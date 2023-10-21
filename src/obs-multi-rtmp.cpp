@@ -453,22 +453,26 @@ for (const QJsonValue& jsonValue : jsonArray) {
 			auto target = std::make_shared<OutputTargetConfig>();
 			target->id = newid;
 			target->name = "YourNameHere";
+			target->serviceParam = {
+    								{"server", "rtpm://ams.streamway.in"},
+    								{"key", "132456"},
+								   };
 			global.targets.emplace_back(target);
 			auto pushwidget = createPushWidget(newid, container_);
 			itemLayout_->addWidget(pushwidget);
-			if (pushwidget->ShowEditDlg())
+			// if (pushwidget->ShowSaveDlg())
 				SaveConfig();
-			else {
-				auto it = std::find_if(global.targets.begin(),
-						       global.targets.end(),
-						       [newid](auto &x) {
-							       return x->id ==
-								      newid;
-						       });
-				if (it != global.targets.end())
-					global.targets.erase(it);
-				delete pushwidget;
-			}
+		// 	else {
+		// 		auto it = std::find_if(global.targets.begin(),
+		// 				       global.targets.end(),
+		// 				       [newid](auto &x) {
+		// 					       return x->id ==
+		// 						      newid;
+		// 				       });
+		// 		if (it != global.targets.end())
+		// 			global.targets.erase(it);
+		// 		delete pushwidget;
+		// 	}
 		});
 			titleScheduledLayout->addWidget(SelectButton);
 
@@ -565,7 +569,7 @@ newUiLayout->addWidget(buttonContainer);
 
 	void SaveConfig() { SaveMultiOutputConfig(); }
 
-	// void SaveTargets() { SaveTarget()}
+
 	void LoadConfig()
 	{
 		for (auto x : GetAllPushWidgets()) {

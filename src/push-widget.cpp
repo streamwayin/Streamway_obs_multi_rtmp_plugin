@@ -670,6 +670,19 @@ public:
             return false;
     }
 
+    bool ShowSaveDlg() override
+    {
+        std::unique_ptr<SaveOutputWidget> dlg{ createSaveOutputWidget(targetid_, this) };
+
+        if (dlg->exec() == QDialog::DialogCode::Accepted)
+        {
+            LoadConfig();
+            return true;
+        }
+        else
+            return false;
+    }
+
     void SetMsg(QString msg)
     {
         msg_->setText(msg);

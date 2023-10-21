@@ -52,7 +52,7 @@ static obs_properties* AddBF(obs_properties* p) {
 }
 
 
-class EditOutputWidgetImpl : public EditOutputWidget
+class SaveOutputWidgetImpl : public SaveOutputWidget
 {
     std::string targetid_;
     OutputTargetConfigPtr config_ = nullptr;
@@ -260,7 +260,7 @@ class EditOutputWidgetImpl : public EditOutputWidget
     }
 
 public:
-    EditOutputWidgetImpl(const std::string& targetid, QWidget* parent = 0)
+    SaveOutputWidgetImpl(const std::string& targetid, QWidget* parent = 0)
         : QDialog(parent)
         , targetid_(targetid)
     {
@@ -564,7 +564,7 @@ public:
         else
             it->resolution.reset();
         
-        // it->encoderParams = videoEncoderSettings_->Save();
+        it->encoderParams = videoEncoderSettings_->Save();
     }
 
     void SaveAudioConfig() {
@@ -580,7 +580,7 @@ public:
         it->id = *config_->audioConfig;
         it->encoderId = tostdu8(aenc_->currentData().toString());
         it->mixerId = a_mixer_->currentData().toInt();
-        // it->encoderParams = audioEncoderSettings_->Save();
+        it->encoderParams = audioEncoderSettings_->Save();
     }
 
     void SaveConfig()
@@ -589,8 +589,8 @@ public:
 
         config_->name = tostdu8(name_->text());
         config_->syncStart = syncStart_->isChecked();
-        // config_->outputParam = outputSettings_->Save();
-        // config_->serviceParam = serviceSettings_->Save();
+        config_->outputParam = outputSettings_->Save();
+        config_->serviceParam = serviceSettings_->Save();
 
         if (venc_->currentIndex() > 0 && venc_->currentData().isValid()) {
             if (!config_->videoConfig.has_value())
@@ -722,6 +722,6 @@ public:
 
 
 
-EditOutputWidget* createEditOutputWidget(const std::string& targetid, QWidget* parent) {
-    return new EditOutputWidgetImpl(targetid, parent);
+SaveOutputWidget* createSaveOutputWidget(const std::string& targetid, QWidget* parent) {
+    return new SaveOutputWidgetImpl(targetid, parent);
 }
