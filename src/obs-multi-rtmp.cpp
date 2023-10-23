@@ -38,6 +38,8 @@ class MultiOutputWidget : public QDockWidget {
 	bool dockVisible_;
 	bool reopenShown_;
 
+	QLabel *StLabel_;
+	QLabel *sloganLabel_;
 	QLabel *codeLabel_;
 	QLineEdit *uidLineEdit_;
     QLineEdit *keyLineEdit_;
@@ -51,7 +53,7 @@ public:
 	MultiOutputWidget(QWidget *parent = 0)
 		: QDockWidget(parent), reopenShown_(false)
 	{
-		setWindowTitle(obs_module_text("Title"));
+		setWindowTitle(obs_module_text("Streamway"));
 		setFeatures(QDockWidget::DockWidgetFloatable |
 			    QDockWidget::DockWidgetMovable);
 
@@ -67,6 +69,25 @@ public:
 		container_ = new QWidget(this);
 		layout_ = new QVBoxLayout(container_);
 		layout_->setAlignment(Qt::AlignmentFlag::AlignTop);
+
+		StLabel_ = new QLabel("Streamway", container_);
+		layout_->addWidget(StLabel_);
+
+		sloganLabel_ = new QLabel("Get More views By multistreaming Directly from OBS", container_);
+		layout_->addWidget(sloganLabel_);
+
+		// This part is a after login
+				// Create a scroll area and set up a widget to contain the items
+		QScrollArea* scrollArea = new QScrollArea;
+		QWidget* scrollWidget = new QWidget;
+		scrollArea->setWidgetResizable(true);
+		scrollArea->setWidget(scrollWidget);
+		scrollArea->resize(500, 500);
+		scrollArea->setMaximumSize(500 , 500);
+		// Create a layout for the widget inside the scroll area
+		QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
+		layout_->addWidget(scrollArea);
+		scrollWidget->setVisible(false);
 
 		// Add a label and text box for entering the uid
 		codeLabel_ = new QLabel("Uid", container_);
@@ -86,7 +107,7 @@ public:
 		verifyButton_ = new QPushButton("Verify", container_);
 		layout_->addWidget(verifyButton_);
 
-		QObject::connect(verifyButton_, &QPushButton::clicked, [this]() {
+		QObject::connect(verifyButton_, &QPushButton::clicked, [this, scrollLayout , scrollWidget]() {
 			// Get the code entered by the user
 			QString uid = uidLineEdit_->text();
             QString key = keyLineEdit_->text();
@@ -112,7 +133,7 @@ public:
 			networkReply = networkManager_->post(request, postData);
 
 			// Connect to the finished signal to handle the response
-			QObject::connect(networkReply, &QNetworkReply::finished, [this]() {
+			QObject::connect(networkReply, &QNetworkReply::finished, [this, scrollLayout ,scrollWidget]() {
 				if (networkReply->error() ==
 				    QNetworkReply::NoError) {
 					// Successful response received
@@ -135,7 +156,12 @@ public:
 						// You have a valid token
 						// You can use 'token' as needed
 						qDebug() << "Token: " << token;
-						handleSuccessfulLogin(token);
+						handleSuccessfulLogin(token , layout_ , scrollLayout);
+						// Hide the verification UI
+            			 uidLineEdit_->setVisible(false);
+    keyLineEdit_->setVisible(false);
+    verifyButton_->setVisible(false);
+	scrollWidget->setVisible(true);
 					} else {
 						// No token found in the response, indicating an invalid code
 						qDebug() << "Invalid token";
@@ -158,6 +184,13 @@ public:
 				networkReply->deleteLater();
 			});
 		});
+
+// 		void hideVerificationUI() {
+//     // Hide the relevant UI elements
+//     uidLineEdit_->setVisible(false);
+//     keyLineEdit_->setVisible(false);
+//     verifyButton_->setVisible(false);
+// }
 
 		// init widget
 		auto addButton = new QPushButton(
@@ -334,13 +367,31 @@ public:
 			layout_->addWidget(cr);
 		} else {
 			auto label = new QLabel(
-				u8"<p>This plugin is provided for free. <br>Author: SoraYuki (<a href=\"https://paypal.me/sorayuki0\">donate</a>) </p>",
+				u8"<p>Dont't have <br> (<a href=\"https://app.streamway.in/setting\">Get UID and Api Key</a>) </p>",
 				container_);
 			label->setTextFormat(Qt::RichText);
 			label->setTextInteractionFlags(
 				Qt::TextBrowserInteraction);
 			label->setOpenExternalLinks(true);
 			layout_->addWidget(label);
+
+			auto watchLable = new QLabel(
+				u8"<p>How to use--> <br> (<a href=\"https://app.streamway.in/setting\">Watch Video</a>) </p>",
+				container_);
+			watchLable->setTextFormat(Qt::RichText);
+			watchLable->setTextInteractionFlags(
+				Qt::TextBrowserInteraction);
+			watchLable->setOpenExternalLinks(true);
+			layout_->addWidget(watchLable);
+
+			auto supportLable = new QLabel(
+				u8"<p>Need Help--> Feel Free to  <br> (<a href=\"https://streamway.in/contact\">Contact</a>) </p>",
+				container_);
+			watchLable->setTextFormat(Qt::RichText);
+			watchLable->setTextInteractionFlags(
+				Qt::TextBrowserInteraction);
+			watchLable->setOpenExternalLinks(true);
+			layout_->addWidget(supportLable);
 		}
 
 		scroll_->setWidgetResizable(true);
@@ -352,14 +403,14 @@ public:
 	}
 
 
-void handleSuccessfulLogin(const QString& token) {
-    QMainWindow* newUi = new QMainWindow;
-    newUi->resize(500, 500);
-	newUi->setMaximumSize(500 , 500);
-    QWidget* centralWidget = new QWidget;
-    QVBoxLayout* newUiLayout = new QVBoxLayout(centralWidget);
+void handleSuccessfulLogin(const QString& token , QVBoxLayout *layout , QVBoxLayout *newUiLayout) {
+    // QMainWindow* newUi = new QMainWindow;
+    // newUi->resize(500, 500);
+	// newUi->setMaximumSize(500 , 500);
+    // QWidget* centralWidget = new QWidget;
+    // QVBoxLayout* newUiLayout = new QVBoxLayout(centralWidget);
 
-    QLabel* successLabel = new QLabel("Success Login");
+    // QLabel* successLabel = new QLabel("Success Login");
    
 
     QNetworkRequest request(QUrl("http://localhost:8000/v1/broadcasts/upcoming"));
@@ -384,7 +435,7 @@ void handleSuccessfulLogin(const QString& token) {
 
 		
 
-        QLabel* tokenLabelSize = new QLabel("Size is: " + QString::number(jsonArray.size()));
+        QLabel* tokenLabelSize = new QLabel("Your Broadcasts " + QString::number(jsonArray.size()));
         newUiLayout->addWidget(tokenLabelSize);
 
 
@@ -499,15 +550,22 @@ for (const QJsonValue& jsonValue : jsonArray) {
 QHBoxLayout* buttonLayout = new QHBoxLayout;
 
 // Create Cancel and Add buttons outside of the loop
-QPushButton* cancelButton = new QPushButton("Cancel");
-QPushButton* addButton = new QPushButton("Add");
+// QPushButton* cancelButton = new QPushButton("Cancel");
+QPushButton* addButton = new QPushButton("Schedule New Broadcast");
 
 // Add the scroll area to your main layout or window
 newUiLayout->addWidget(scrollArea);
 // Add Cancel and Add buttons to the layout or wherever appropriate
-buttonLayout->addWidget(cancelButton);
+// buttonLayout->addWidget(cancelButton);
 buttonLayout->addWidget(addButton);
+QObject::connect(addButton, &QPushButton::clicked,
+				 [this]() {
+					 // URL to open in the default web browser
+        // QUrl url("https://app.streamway.in");
 
+        // Open the URL in the user's default web browser
+        QDesktopServices::openUrl(QUrl("https://app.streamway.in"));
+				 });
 // Create a container widget for the button layout
 QWidget* buttonContainer = new QWidget;
 buttonContainer->setLayout(buttonLayout);
@@ -522,11 +580,11 @@ newUiLayout->addWidget(buttonContainer);
 
     networkReply->deleteLater();
 
-    newUiLayout->addWidget(successLabel);
+    // newUiLayout->addWidget(successLabel);
   
-
-    newUi->setCentralWidget(centralWidget);
-    newUi->show();
+	
+    // newUi->setCentralWidget(centralWidget);
+    // newUi->show();
 }
 
 
