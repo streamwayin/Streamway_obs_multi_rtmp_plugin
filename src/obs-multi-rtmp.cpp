@@ -78,15 +78,16 @@ public:
 
 		// This part is a after login
 				// Create a scroll area and set up a widget to contain the items
-		QScrollArea* scrollArea = new QScrollArea;
+		// QScrollArea* scrollArea = new QScrollArea;
 		QWidget* scrollWidget = new QWidget;
-		scrollArea->setWidgetResizable(true);
-		scrollArea->setWidget(scrollWidget);
-		scrollArea->resize(500, 500);
-		scrollArea->setMaximumSize(500 , 500);
+		// scrollArea->setWidgetResizable(true);
+		// scrollArea->setWidget(scrollWidget);
+		// scrollArea->resize(500, 500);
+		// scrollArea->setMaximumSize(500 , 500);
+		scrollWidget->setFixedSize(330, 500);
 		// Create a layout for the widget inside the scroll area
 		QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
-		layout_->addWidget(scrollArea);
+		layout_->addWidget(scrollWidget);
 		scrollWidget->setVisible(false);
 
 		// Add a label and text box for entering the uid
@@ -156,12 +157,14 @@ public:
 						// You have a valid token
 						// You can use 'token' as needed
 						qDebug() << "Token: " << token;
-						handleSuccessfulLogin(token , layout_ , scrollLayout);
+						handleTab(token , layout_ , scrollLayout);
+						// handleSuccessfulLogin(token ,  scrollLayout);
 						// Hide the verification UI
             			 uidLineEdit_->setVisible(false);
-    keyLineEdit_->setVisible(false);
-    verifyButton_->setVisible(false);
-	scrollWidget->setVisible(true);
+    					 keyLineEdit_->setVisible(false);
+    					 verifyButton_->setVisible(false);
+						 codeLabel_->setVisible(false);
+						 scrollWidget->setVisible(true);
 					} else {
 						// No token found in the response, indicating an invalid code
 						qDebug() << "Invalid token";
@@ -191,61 +194,6 @@ public:
 //     keyLineEdit_->setVisible(false);
 //     verifyButton_->setVisible(false);
 // }
-
-		// init widget
-		auto addButton = new QPushButton(
-			obs_module_text("Btn.NewTarget"), container_);
-		QObject::connect(addButton, &QPushButton::clicked, [this]() {
-			auto &global = GlobalMultiOutputConfig();
-			auto newid = GenerateId(global);
-			auto target = std::make_shared<OutputTargetConfig>();
-			target->id = newid;
-			global.targets.emplace_back(target);
-			auto pushwidget = createPushWidget(newid, container_);
-			itemLayout_->addWidget(pushwidget);
-			if (pushwidget->ShowEditDlg())
-				SaveConfig();
-			else {
-				auto it = std::find_if(global.targets.begin(),
-						       global.targets.end(),
-						       [newid](auto &x) {
-							       return x->id ==
-								      newid;
-						       });
-				if (it != global.targets.end())
-					global.targets.erase(it);
-				delete pushwidget;
-			}
-		});
-		layout_->addWidget(addButton);
-
-		// start all, stop all
-		auto allBtnContainer = new QWidget(this);
-		auto allBtnLayout = new QHBoxLayout();
-		auto startAllButton = new QPushButton(
-			obs_module_text("Btn.StartAll"), allBtnContainer);
-		allBtnLayout->addWidget(startAllButton);
-		auto stopAllButton = new QPushButton(
-			obs_module_text("Btn.StopAll"), allBtnContainer);
-		allBtnLayout->addWidget(stopAllButton);
-		allBtnContainer->setLayout(allBtnLayout);
-		layout_->addWidget(allBtnContainer);
-
-		QObject::connect(startAllButton, &QPushButton::clicked,
-				 [this]() {
-					 for (auto x : GetAllPushWidgets())
-						 x->StartStreaming();
-				 });
-		QObject::connect(stopAllButton, &QPushButton::clicked,
-				 [this]() {
-					 for (auto x : GetAllPushWidgets())
-						 x->StopStreaming();
-				 });
-
-		// load config
-		itemLayout_ = new QVBoxLayout(this);
-		LoadConfig();
-		layout_->addLayout(itemLayout_);
 
 		// donate
 		if (std::string(
@@ -402,16 +350,88 @@ public:
 		resize(200, 400);
 	}
 
+// Function to create Tab 1 and its content
+QWidget* createTab1(const QString& token) {
+    QWidget* tab1 = new QWidget;
+    QVBoxLayout* tab1Layout = new QVBoxLayout(tab1);
+	handleSuccessfulLogin(token , tab1Layout);
+    return tab1;
+};
 
-void handleSuccessfulLogin(const QString& token , QVBoxLayout *layout , QVBoxLayout *newUiLayout) {
-    // QMainWindow* newUi = new QMainWindow;
-    // newUi->resize(500, 500);
-	// newUi->setMaximumSize(500 , 500);
-    // QWidget* centralWidget = new QWidget;
-    // QVBoxLayout* newUiLayout = new QVBoxLayout(centralWidget);
+// Function to create Tab 2 and its content
+QWidget* createTab2() {
+    QWidget* tab2 = new QWidget;
+    tab2->setFixedSize(320, 600);
+    QVBoxLayout* tab2Layout = new QVBoxLayout(tab2);
+	// init widget
+		auto addButton = new QPushButton(
+			obs_module_text("Btn.NewTarget"), container_);
+		QObject::connect(addButton, &QPushButton::clicked, [this]() {
+			auto &global = GlobalMultiOutputConfig();
+			auto newid = GenerateId(global);
+			auto target = std::make_shared<OutputTargetConfig>();
+			target->id = newid;
+			global.targets.emplace_back(target);
+			auto pushwidget = createPushWidget(newid, container_);
+			itemLayout_->addWidget(pushwidget);
+			if (pushwidget->ShowEditDlg())
+				SaveConfig();
+			else {
+				auto it = std::find_if(global.targets.begin(),
+						       global.targets.end(),
+						       [newid](auto &x) {
+							       return x->id ==
+								      newid;
+						       });
+				if (it != global.targets.end())
+					global.targets.erase(it);
+				delete pushwidget;
+			}
+		});
+		tab2Layout->addWidget(addButton);
 
-    // QLabel* successLabel = new QLabel("Success Login");
-   
+		// start all, stop all
+		auto allBtnContainer = new QWidget(this);
+		auto allBtnLayout = new QHBoxLayout();
+		auto startAllButton = new QPushButton(
+			obs_module_text("Btn.StartAll"), allBtnContainer);
+		allBtnLayout->addWidget(startAllButton);
+		auto stopAllButton = new QPushButton(
+			obs_module_text("Btn.StopAll"), allBtnContainer);
+		allBtnLayout->addWidget(stopAllButton);
+		allBtnContainer->setLayout(allBtnLayout);
+		tab2Layout->addWidget(allBtnContainer);
+
+		QObject::connect(startAllButton, &QPushButton::clicked,
+				 [this]() {
+					 for (auto x : GetAllPushWidgets())
+						 x->StartStreaming();
+				 });
+		QObject::connect(stopAllButton, &QPushButton::clicked,
+				 [this]() {
+					 for (auto x : GetAllPushWidgets())
+						 x->StopStreaming();
+				 });
+
+		// load config
+		itemLayout_ = new QVBoxLayout(this);
+		LoadConfig();
+		tab2Layout->addLayout(itemLayout_);
+
+    return tab2;
+};
+
+void handleTab(const QString& token , QVBoxLayout *layout , QVBoxLayout *newUiLayout) {
+	// Create a QTabWidget to hold the tabs
+	QTabWidget* tabWidget = new QTabWidget;
+
+	// Call the functions to create tabs and add them to the QTabWidget
+    tabWidget->addTab(createTab1(token), "Broadcasts");
+    tabWidget->addTab(createTab2(), "Go Live");
+	newUiLayout->addWidget(tabWidget);
+};
+
+void handleSuccessfulLogin(const QString& token , QVBoxLayout *newUiLayout) {
 
     QNetworkRequest request(QUrl("http://localhost:8000/v1/broadcasts/upcoming"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -442,6 +462,8 @@ void handleSuccessfulLogin(const QString& token , QVBoxLayout *layout , QVBoxLay
 		// Create a scroll area and set up a widget to contain the items
 QScrollArea* scrollArea = new QScrollArea;
 QWidget* scrollWidget = new QWidget;
+// scrollWidget->setMinimumSize(300, 400);
+scrollArea->resize(300,300);
 scrollArea->setWidgetResizable(true);
 scrollArea->setWidget(scrollWidget);
 
@@ -459,6 +481,15 @@ for (const QJsonValue& jsonValue : jsonArray) {
 			// Create a group for title and scheduledTime
             QGroupBox* titleScheduledGroup = new QGroupBox;
             QVBoxLayout* titleScheduledLayout = new QVBoxLayout(titleScheduledGroup);
+
+			// Set a fixed size for the QGroupBox
+			titleScheduledGroup->setFixedSize(270, 200); // Set the desired width and height
+			// Set padding or margins for the contents of the QGroupBox
+			int leftMargin = 10; // Adjust as needed
+			int topMargin = 10;  // Adjust as needed
+			int rightMargin = 10; // Adjust as needed
+			int bottomMargin = 10;  // Adjust as needed
+			titleScheduledLayout->setContentsMargins(leftMargin, topMargin, rightMargin, bottomMargin);
 
 			// Retrieve the image URL from the jsonObject
 			QString imageUrl = jsonObject["thumbnail"].toString();
@@ -497,9 +528,25 @@ for (const QJsonValue& jsonValue : jsonArray) {
             QLabel* titleLabel = new QLabel(title);
             titleScheduledLayout->addWidget(titleLabel);
 
+
+            // Show scheduledTime from jsonObject
+            QString scheduledTime = jsonObject["scheduledTime"].toString();
+            QLabel* timeLabel = new QLabel(scheduledTime);
+            titleScheduledLayout->addWidget(timeLabel);
+
 			QPushButton* SelectButton = new QPushButton("Select");
 			QObject::connect(SelectButton, &QPushButton::clicked, [this]() {
-			auto &global = GlobalMultiOutputConfig();
+				// GetGlobalService().RunInUIThread([this]() {
+                auto &global = GlobalMultiOutputConfig();
+                //     // auto it = std::find_if(global.targets.begin(), global.targets.end(), [&](auto& x) { return x->id == targetid_; });
+                //     // if (it != global.targets.end()) {
+                global.targets.clear();
+				SaveMultiOutputConfig();
+                //     // }
+                //     delete this;
+                //     SaveMultiOutputConfig();
+                // });
+			// auto &global = GlobalMultiOutputConfig();
 			auto newid = GenerateId(global);
 			auto target = std::make_shared<OutputTargetConfig>();
 			target->id = newid;
@@ -511,28 +558,9 @@ for (const QJsonValue& jsonValue : jsonArray) {
 			global.targets.emplace_back(target);
 			auto pushwidget = createPushWidget(newid, container_);
 			itemLayout_->addWidget(pushwidget);
-			// if (pushwidget->ShowSaveDlg())
 				SaveConfig();
-		// 	else {
-		// 		auto it = std::find_if(global.targets.begin(),
-		// 				       global.targets.end(),
-		// 				       [newid](auto &x) {
-		// 					       return x->id ==
-		// 						      newid;
-		// 				       });
-		// 		if (it != global.targets.end())
-		// 			global.targets.erase(it);
-		// 		delete pushwidget;
-		// 	}
-		});
+			});
 			titleScheduledLayout->addWidget(SelectButton);
-
-
-
-            // Show scheduledTime from jsonObject
-            QString scheduledTime = jsonObject["scheduledTime"].toString();
-            QLabel* timeLabel = new QLabel(scheduledTime);
-            titleScheduledLayout->addWidget(timeLabel);
 
 			// Add the title and scheduledTime group to the item layout
             itemLayout->addWidget(titleScheduledGroup);

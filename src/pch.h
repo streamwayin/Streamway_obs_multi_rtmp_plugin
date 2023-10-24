@@ -35,6 +35,7 @@
 #include <QPixmap>
 #include <QImage>
 #include <QDesktopServices>
+#include <QTabWidget>
 #include "obs-multi-rtmp.h"
 #include "obs-module.h"
 #include "obs-frontend-api.h"
