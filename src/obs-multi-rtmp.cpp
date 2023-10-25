@@ -38,12 +38,12 @@ class MultiOutputWidget : public QDockWidget {
 	bool dockVisible_;
 	bool reopenShown_;
 
-	QLabel *StLabel_;
-	QLabel *sloganLabel_;
-	QLabel *codeLabel_;
-	QLineEdit *uidLineEdit_;
-    QLineEdit *keyLineEdit_;
-	QPushButton *verifyButton_;
+	// QLabel *StLabel_;
+	// QLabel *sloganLabel_;
+	// QLabel *codeLabel_;
+	// QLineEdit *uidLineEdit_;
+    // QLineEdit *keyLineEdit_;
+	// QPushButton *verifyButton_;
 	QNetworkAccessManager *networkManager_;
 	QNetworkReply *networkReply;
 	QJsonDocument jsonDoc;
@@ -70,130 +70,117 @@ public:
 		layout_ = new QVBoxLayout(container_);
 		layout_->setAlignment(Qt::AlignmentFlag::AlignTop);
 
-		StLabel_ = new QLabel("Streamway", container_);
-		layout_->addWidget(StLabel_);
+		layout_->addWidget(LoginWidget());
+		// StLabel_ = new QLabel("Streamway", container_);
+		// layout_->addWidget(StLabel_);
 
-		sloganLabel_ = new QLabel("Get More views By multistreaming Directly from OBS", container_);
-		layout_->addWidget(sloganLabel_);
+		// sloganLabel_ = new QLabel("Get More views By multistreaming Directly from OBS", container_);
+		// layout_->addWidget(sloganLabel_);
 
 		// This part is a after login
 				// Create a scroll area and set up a widget to contain the items
 		// QScrollArea* scrollArea = new QScrollArea;
-		QWidget* scrollWidget = new QWidget;
-		// scrollArea->setWidgetResizable(true);
-		// scrollArea->setWidget(scrollWidget);
-		// scrollArea->resize(500, 500);
-		// scrollArea->setMaximumSize(500 , 500);
-		scrollWidget->setFixedSize(330, 500);
-		// Create a layout for the widget inside the scroll area
-		QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
-		layout_->addWidget(scrollWidget);
-		scrollWidget->setVisible(false);
+		// QWidget* scrollWidget = new QWidget;
+		// // scrollArea->setWidgetResizable(true);
+		// scrollWidget->setFixedSize(330, 500);
+		// // Create a layout for the widget inside the scroll area
+		// QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
+		// layout_->addWidget(scrollWidget);
+		// scrollWidget->setVisible(false);
 
-		// Add a label and text box for entering the uid
-		codeLabel_ = new QLabel("Uid", container_);
-		layout_->addWidget(codeLabel_);
+		// // Add a label and text box for entering the uid
+		// codeLabel_ = new QLabel("Uid", container_);
+		// layout_->addWidget(codeLabel_);
 
-		uidLineEdit_ = new QLineEdit(container_);
-		layout_->addWidget(uidLineEdit_);
+		// uidLineEdit_ = new QLineEdit(container_);
+		// layout_->addWidget(uidLineEdit_);
 
-        // Add a label and text box for entering the code
-		codeLabel_ = new QLabel("API Key", container_);
-		layout_->addWidget(codeLabel_);
+        // // Add a label and text box for entering the code
+		// codeLabel_ = new QLabel("API Key", container_);
+		// layout_->addWidget(codeLabel_);
 
-		keyLineEdit_ = new QLineEdit(container_);
-		layout_->addWidget(keyLineEdit_);
+		// keyLineEdit_ = new QLineEdit(container_);
+		// layout_->addWidget(keyLineEdit_);
 
-		// Add a button for verification
-		verifyButton_ = new QPushButton("Verify", container_);
-		layout_->addWidget(verifyButton_);
+		// // Add a button for verification
+		// verifyButton_ = new QPushButton("Verify", container_);
+		// layout_->addWidget(verifyButton_);
 
-		QObject::connect(verifyButton_, &QPushButton::clicked, [this, scrollLayout , scrollWidget]() {
-			// Get the code entered by the user
-			QString uid = uidLineEdit_->text();
-            QString key = keyLineEdit_->text();
+		// QObject::connect(verifyButton_, &QPushButton::clicked, [this, scrollLayout , scrollWidget]() {
+		// 	// Get the code entered by the user
+		// 	QString uid = uidLineEdit_->text();
+        //     QString key = keyLineEdit_->text();
+		// 	QString combined = uid + ":" + key;
+		// 	// Construct the request
+		// 	QNetworkRequest request(QUrl("http://localhost:8000/v1/destinations"));
+		// 	request.setHeader(QNetworkRequest::ContentTypeHeader,
+		// 			  "application/json");
 
-			// Construct the request
-			QNetworkRequest request(QUrl("http://localhost:8000"));
-			request.setHeader(QNetworkRequest::ContentTypeHeader,
-					  "application/json");
+		// 	// Create a QNetworkAccessManager for making the HTTP request
+		// 	networkManager_ = new QNetworkAccessManager(this);
 
-			// Create a QNetworkAccessManager for making the HTTP request
-			networkManager_ = new QNetworkAccessManager(this);
+		// 	QByteArray combinedData = combined.toUtf8().toBase64();
+		// 	QString base64AuthHeader = "Basic " + QString(combinedData);
+		// 	request.setRawHeader("Authorization", base64AuthHeader.toUtf8());
+		// 	// Send the POST request
+		// 	networkReply = networkManager_->get(request);
 
-			// Construct the POST data with the Refer Code
-			// QByteArray postData;
-			// postData.append("ReferCode=" + code.toUtf8());
-			QJsonObject obj;
-			obj["uid"] = uid;
-			obj["api_key"] = key;
-			QJsonDocument doc(obj);
-			QByteArray postData = doc.toJson();
+		// 	// Connect to the finished signal to handle the response
+		// 	QObject::connect(networkReply, &QNetworkReply::finished, [this, scrollLayout ,scrollWidget]() {
+		// 		if (networkReply->error() ==
+		// 		    QNetworkReply::NoError) {
+		// 			// Successful response received
 
-			// Send the POST request
-			networkReply = networkManager_->post(request, postData);
+		// 			// Read the response data
+		// 			QByteArray responseData =
+		// 				networkReply->readAll();
 
-			// Connect to the finished signal to handle the response
-			QObject::connect(networkReply, &QNetworkReply::finished, [this, scrollLayout ,scrollWidget]() {
-				if (networkReply->error() ==
-				    QNetworkReply::NoError) {
-					// Successful response received
+		// 			// TODO: Parse the response data to extract the token
+		// 			// Assuming the response contains a JSON object with a "token" field
+		// 			jsonDoc = QJsonDocument::fromJson(
+		// 				responseData);
+		// 			jsonObj = jsonDoc.object();
 
-					// Read the response data
-					QByteArray responseData =
-						networkReply->readAll();
+		// 			if (jsonObj.contains("token")) {
+		// 				QString token =
+		// 					jsonObj["token"]
+		// 						.toString();
 
-					// TODO: Parse the response data to extract the token
-					// Assuming the response contains a JSON object with a "token" field
-					jsonDoc = QJsonDocument::fromJson(
-						responseData);
-					jsonObj = jsonDoc.object();
+		// 				// You have a valid token
+		// 				// You can use 'token' as needed
+		// 				qDebug() << "Token: " << token;
+		// 				handleTab(token , layout_ , scrollLayout);
+		// 				// handleSuccessfulLogin(token ,  scrollLayout);
+		// 				// Hide the verification UI
+        //     			 uidLineEdit_->setVisible(false);
+    	// 				 keyLineEdit_->setVisible(false);
+    	// 				 verifyButton_->setVisible(false);
+		// 				 codeLabel_->setVisible(false);
+		// 				 scrollWidget->setVisible(true);
+		// 			} else {
+		// 				// No token found in the response, indicating an invalid code
+		// 				qDebug() << "Invalid token";
+		// 				QLabel *codeLabela_ = new QLabel(
+		// 					"Invalid token:",
+		// 					container_);
+		// 				layout_->addWidget(codeLabela_);
+		// 			}
+		// 		} else {
+		// 			// Handle the network error here
+		// 			qDebug() << "Network error: "
+		// 				 << networkReply->errorString();
+		// 			QLabel *codeLabelc_ = new QLabel(
+		// 				networkReply->errorString(),
+		// 				container_);
+		// 			layout_->addWidget(codeLabelc_);
+		// 		}
 
-					if (jsonObj.contains("token")) {
-						QString token =
-							jsonObj["token"]
-								.toString();
+		// 		// Clean up the network resources
+		// 		networkReply->deleteLater();
+			// });
+		// });
 
-						// You have a valid token
-						// You can use 'token' as needed
-						qDebug() << "Token: " << token;
-						handleTab(token , layout_ , scrollLayout);
-						// handleSuccessfulLogin(token ,  scrollLayout);
-						// Hide the verification UI
-            			 uidLineEdit_->setVisible(false);
-    					 keyLineEdit_->setVisible(false);
-    					 verifyButton_->setVisible(false);
-						 codeLabel_->setVisible(false);
-						 scrollWidget->setVisible(true);
-					} else {
-						// No token found in the response, indicating an invalid code
-						qDebug() << "Invalid token";
-						QLabel *codeLabela_ = new QLabel(
-							"Invalid token:",
-							container_);
-						layout_->addWidget(codeLabela_);
-					}
-				} else {
-					// Handle the network error here
-					qDebug() << "Network error: "
-						 << networkReply->errorString();
-					QLabel *codeLabelc_ = new QLabel(
-						networkReply->errorString(),
-						container_);
-					layout_->addWidget(codeLabelc_);
-				}
 
-				// Clean up the network resources
-				networkReply->deleteLater();
-			});
-		});
-
-// 		void hideVerificationUI() {
-//     // Hide the relevant UI elements
-//     uidLineEdit_->setVisible(false);
-//     keyLineEdit_->setVisible(false);
-//     verifyButton_->setVisible(false);
-// }
 
 		// donate
 		if (std::string(
@@ -351,6 +338,121 @@ public:
 	}
 
 // Function to create Tab 1 and its content
+QWidget* LoginWidget() {
+    QWidget* loginWidget = new QWidget;
+    QVBoxLayout* LoginLayout = new QVBoxLayout(loginWidget);
+
+	QLabel* StLabel_ = new QLabel("Streamway", loginWidget);
+	LoginLayout->addWidget(StLabel_);
+
+	QLabel* sloganLabel_ = new QLabel("Get More views By multistreaming Directly from OBS", loginWidget);
+		layout_->addWidget(sloganLabel_);
+
+	QWidget* scrollWidget = new QWidget;
+		// scrollArea->setWidgetResizable(true);
+		scrollWidget->setFixedSize(330, 500);
+		// Create a layout for the widget inside the scroll area
+		QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
+		layout_->addWidget(scrollWidget);
+		scrollWidget->setVisible(false);
+
+		// Add a label and text box for entering the uid
+		QLabel* codeLabel_ = new QLabel("Uid", container_);
+		layout_->addWidget(codeLabel_);
+
+		QLineEdit* uidLineEdit_ = new QLineEdit(container_);
+		layout_->addWidget(uidLineEdit_);
+
+        // Add a label and text box for entering the code
+		codeLabel_ = new QLabel("API Key", container_);
+		layout_->addWidget(codeLabel_);
+
+		QLineEdit* keyLineEdit_ = new QLineEdit(container_);
+		layout_->addWidget(keyLineEdit_);
+
+		// Add a button for verification
+		QPushButton* verifyButton_ = new QPushButton("Verify", container_);
+		layout_->addWidget(verifyButton_);
+
+		QObject::connect(verifyButton_, &QPushButton::clicked, [this, scrollLayout , scrollWidget , uidLineEdit_ , keyLineEdit_ ,verifyButton_ , codeLabel_]() {
+			// Get the code entered by the user
+			QString uid = uidLineEdit_->text();
+            QString key = keyLineEdit_->text();
+			QString combined = uid + ":" + key;
+			// Construct the request
+			QNetworkRequest request(QUrl("http://localhost:8000/v1/obs/version"));
+			request.setHeader(QNetworkRequest::ContentTypeHeader,
+					  "application/json");
+
+			// Create a QNetworkAccessManager for making the HTTP request
+			networkManager_ = new QNetworkAccessManager(this);
+
+			QByteArray combinedData = combined.toUtf8().toBase64();
+			QString base64AuthHeader = "Basic " + QString(combinedData);
+			request.setRawHeader("Authorization", base64AuthHeader.toUtf8());
+			// Send the POST request
+			networkReply = networkManager_->get(request);
+
+			// Connect to the finished signal to handle the response
+			QObject::connect(networkReply, &QNetworkReply::finished, [this, scrollLayout ,scrollWidget ,  uidLineEdit_ , keyLineEdit_ , verifyButton_ , codeLabel_ ,base64AuthHeader]() {
+				if (networkReply->error() ==
+				    QNetworkReply::NoError) {
+					// Successful response received
+
+					// Read the response data
+					QByteArray responseData =
+						networkReply->readAll();
+
+					// TODO: Parse the response data to extract the token
+					// Assuming the response contains a JSON object with a "token" field
+					jsonDoc = QJsonDocument::fromJson(
+						responseData);
+					jsonObj = jsonDoc.object();
+
+					if (jsonObj.contains("success")) {
+						QString token =
+							jsonObj["success"]
+								.toString();
+
+						// You have a valid token
+						// You can use 'token' as needed
+						qDebug() << "Token: " << token;
+						handleTab(base64AuthHeader , layout_ , scrollLayout);
+						// handleSuccessfulLogin(token ,  scrollLayout);
+						// Hide the verification UI
+            			 uidLineEdit_->setVisible(false);
+    					 keyLineEdit_->setVisible(false);
+    					 verifyButton_->setVisible(false);
+						 codeLabel_->setVisible(false);
+						 scrollWidget->setVisible(true);
+					} else {
+						// No token found in the response, indicating an invalid code
+						qDebug() << "Invalid token";
+						QLabel *codeLabela_ = new QLabel(
+							"Invalid token:",
+							container_);
+						layout_->addWidget(codeLabela_);
+					}
+				} else {
+					// Handle the network error here
+					qDebug() << "Network error: "
+						 << networkReply->errorString();
+					QLabel *codeLabelc_ = new QLabel(
+						networkReply->errorString(),
+						container_);
+					layout_->addWidget(codeLabelc_);
+				}
+
+				// Clean up the network resources
+				networkReply->deleteLater();
+			});
+		});
+
+    return loginWidget;
+};
+
+
+// Function to create Tab 1 and its content
 QWidget* createTab1(const QString& token) {
     QWidget* tab1 = new QWidget;
     QVBoxLayout* tab1Layout = new QVBoxLayout(tab1);
@@ -360,9 +462,16 @@ QWidget* createTab1(const QString& token) {
 
 // Function to create Tab 2 and its content
 QWidget* createTab2() {
+	QScrollArea* scrollArea = new QScrollArea;
     QWidget* tab2 = new QWidget;
-    tab2->setFixedSize(320, 600);
-    QVBoxLayout* tab2Layout = new QVBoxLayout(tab2);
+    QVBoxLayout* tab2Layout = new QVBoxLayout();
+	
+	scrollArea->resize(300,300);
+	scrollArea->setWidgetResizable(true);
+	scrollArea->setWidget(tab2);
+
+    // tab2->setFixedSize(320, 600);
+	tab2Layout->addWidget(scrollArea);
 	// init widget
 		auto addButton = new QPushButton(
 			obs_module_text("Btn.NewTarget"), container_);
@@ -372,8 +481,11 @@ QWidget* createTab2() {
 			auto target = std::make_shared<OutputTargetConfig>();
 			target->id = newid;
 			global.targets.emplace_back(target);
+
 			auto pushwidget = createPushWidget(newid, container_);
 			itemLayout_->addWidget(pushwidget);
+			
+
 			if (pushwidget->ShowEditDlg())
 				SaveConfig();
 			else {
@@ -414,7 +526,7 @@ QWidget* createTab2() {
 				 });
 
 		// load config
-		itemLayout_ = new QVBoxLayout(this);
+		itemLayout_ = new QVBoxLayout(tab2);
 		LoadConfig();
 		tab2Layout->addLayout(itemLayout_);
 
@@ -436,8 +548,8 @@ void handleSuccessfulLogin(const QString& token , QVBoxLayout *newUiLayout) {
     QNetworkRequest request(QUrl("http://localhost:8000/v1/broadcasts/upcoming"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QString authHeader = "Bearer " + token;
-    request.setRawHeader("Authorization", authHeader.toUtf8());
+    request.setRawHeader("Authorization", token.toUtf8());
+   
 
     QNetworkAccessManager networkManager;
     QNetworkReply* networkReply = networkManager.get(request);
