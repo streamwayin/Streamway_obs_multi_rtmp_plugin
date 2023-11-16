@@ -300,33 +300,37 @@ public:
 			});
 
 			layout_->addWidget(cr);
+			// auto stackedLayout = new QStackedLayout;
 		} else {
+
+			auto horizontalLayout = new QHBoxLayout;
 			auto label = new QLabel(
-				u8"<p>Dont't have <br> (<a href=\"https://app.streamway.in/setting\">Get UID and Api Key</a>) </p>",
+				u8"<p><img src='https://localhost:3000/src/Images/icon.png' alt='st' />Get Your <a href=\"https://app.streamway.in/setting\">Uid and Api Key</a></p>",
 				container_);
 			label->setTextFormat(Qt::RichText);
 			label->setTextInteractionFlags(
 				Qt::TextBrowserInteraction);
 			label->setOpenExternalLinks(true);
-			layout_->addWidget(label);
+			horizontalLayout->addWidget(label);
 
 			auto watchLable = new QLabel(
-				u8"<p>How to use--> <br> (<a href=\"https://app.streamway.in/setting\">Watch Video</a>) </p>",
+				u8"<p>How to Use <a href=\"https://app.streamway.in/setting\">Watch Our Video</a> </p>",
 				container_);
 			watchLable->setTextFormat(Qt::RichText);
 			watchLable->setTextInteractionFlags(
 				Qt::TextBrowserInteraction);
 			watchLable->setOpenExternalLinks(true);
-			layout_->addWidget(watchLable);
+			horizontalLayout->addWidget(watchLable);
 
 			auto supportLable = new QLabel(
-				u8"<p>Need Help--> Feel Free to  <br> (<a href=\"https://streamway.in/contact\">Contact</a>) </p>",
+				u8"<p>Any Help <a href=\"https://streamway.in/contact\">Contact Us</a></p>",
 				container_);
-			watchLable->setTextFormat(Qt::RichText);
-			watchLable->setTextInteractionFlags(
+			supportLable->setTextFormat(Qt::RichText);
+			supportLable->setTextInteractionFlags(
 				Qt::TextBrowserInteraction);
-			watchLable->setOpenExternalLinks(true);
-			layout_->addWidget(supportLable);
+			supportLable->setOpenExternalLinks(true);
+			horizontalLayout->addWidget(supportLable);
+			layout_->addLayout(horizontalLayout);
 		}
 
 		scroll_->setWidgetResizable(true);
@@ -345,7 +349,7 @@ QWidget* LoginWidget() {
 	QLabel* StLabel_ = new QLabel("Streamway", loginWidget);
 	LoginLayout->addWidget(StLabel_);
 
-	QLabel* sloganLabel_ = new QLabel("Get More views By multistreaming Directly from OBS", loginWidget);
+	QLabel* sloganLabel_ = new QLabel("Get More Views By Multistreaming Directly from OBS", loginWidget);
 		layout_->addWidget(sloganLabel_);
 
 	QWidget* scrollWidget = new QWidget;
@@ -364,7 +368,7 @@ QWidget* LoginWidget() {
 		layout_->addWidget(uidLineEdit_);
 
         // Add a label and text box for entering the code
-		codeLabel_ = new QLabel("API Key", container_);
+		codeLabel_ = new QLabel("API 123456hKey", container_);
 		layout_->addWidget(codeLabel_);
 
 		QLineEdit* keyLineEdit_ = new QLineEdit(container_);
@@ -398,7 +402,17 @@ QWidget* LoginWidget() {
 				if (networkReply->error() ==
 				    QNetworkReply::NoError) {
 					// Successful response received
+					// obs_data_t *settings = obs_data_create();
+					// obs_service_t *service = obs_service_create("custom", "Custom RTMP", settings, NULL);
+					obs_data_t *settings = obs_data_create();
+					obs_data_set_string(settings, "server", "rtmp://your-custom-url.com");
+					obs_data_set_bool(settings, "use_auth", true);
+					obs_data_set_string(settings, "key", "132456");
 
+					obs_service_t *service = obs_service_create("rtmp_common", "Custom RTMP Service", settings, NULL);
+					obs_service_update(service, settings);
+
+					obs_data_release(settings);
 					// Read the response data
 					QByteArray responseData =
 						networkReply->readAll();
@@ -462,16 +476,16 @@ QWidget* createTab1(const QString& token) {
 
 // Function to create Tab 2 and its content
 QWidget* createTab2() {
-	QScrollArea* scrollArea = new QScrollArea;
+	// QScrollArea* scrollArea = new QScrollArea;
     QWidget* tab2 = new QWidget;
-    QVBoxLayout* tab2Layout = new QVBoxLayout();
+    tab2Layout = new QVBoxLayout(tab2);
 	
-	scrollArea->resize(300,300);
-	scrollArea->setWidgetResizable(true);
-	scrollArea->setWidget(tab2);
+	// scrollArea->resize(300,300);
+	// scrollArea->setWidgetResizable(true);
+	// scrollArea->setWidget(tab2);
 
     // tab2->setFixedSize(320, 600);
-	tab2Layout->addWidget(scrollArea);
+	// tab2Layout->addWidget(scrollArea);
 	// init widget
 		auto addButton = new QPushButton(
 			obs_module_text("Btn.NewTarget"), container_);
@@ -504,7 +518,7 @@ QWidget* createTab2() {
 
 		// start all, stop all
 		auto allBtnContainer = new QWidget(this);
-		auto allBtnLayout = new QHBoxLayout();
+		auto allBtnLayout = new QHBoxLayout(allBtnContainer);
 		auto startAllButton = new QPushButton(
 			obs_module_text("Btn.StartAll"), allBtnContainer);
 		allBtnLayout->addWidget(startAllButton);
@@ -567,7 +581,7 @@ void handleSuccessfulLogin(const QString& token , QVBoxLayout *newUiLayout) {
 
 		
 
-        QLabel* tokenLabelSize = new QLabel("Your Broadcasts " + QString::number(jsonArray.size()));
+        QLabel* tokenLabelSize = new QLabel("total broadcasts " + QString::number(jsonArray.size()));
         newUiLayout->addWidget(tokenLabelSize);
 
 
@@ -632,8 +646,7 @@ for (const QJsonValue& jsonValue : jsonArray) {
 });
 
 
-			QLabel* gfgf = new QLabel("scheduledTime");
-            titleScheduledLayout->addWidget(gfgf);
+			
 			titleScheduledLayout->addWidget(thumbnailLabel); // Add the image label
             // Show title from jsonObject
             QString title = jsonObject["title"].toString();
@@ -642,36 +655,74 @@ for (const QJsonValue& jsonValue : jsonArray) {
 
 
             // Show scheduledTime from jsonObject
-            QString scheduledTime = jsonObject["scheduledTime"].toString();
-            QLabel* timeLabel = new QLabel(scheduledTime);
+            QString scheduledTimeStr = jsonObject["scheduledTime"].toString();
+			// scheduledTimeStr.resize(10);
+
+			// QString scheduledTimeStr = "2023-11-06T16:24";
+
+// Parse the input string
+QDateTime scheduledTime = QDateTime::fromString(scheduledTimeStr, "yyyy-MM-ddTHH:mm");
+
+// Format the datetime as per your requirement
+QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
+			QLabel* gfgf = new QLabel("scheduledTime");
+            titleScheduledLayout->addWidget(gfgf);
+
+            QLabel* timeLabel = new QLabel(formattedTime);
             titleScheduledLayout->addWidget(timeLabel);
 
 			QPushButton* SelectButton = new QPushButton("Select");
-			QObject::connect(SelectButton, &QPushButton::clicked, [this]() {
-				// GetGlobalService().RunInUIThread([this]() {
+			QObject::connect(SelectButton, &QPushButton::clicked, [this , jsonObject]() {
+				//obs_output_t *output_name = "rtpm://sfdfsd";
+// obs_output_t *output = obs_output_get_by_name(output_name);
+
+  //obs_output_set_service(output_name, "custom");
+
+				// obs_output_set_service( , "custom");
                 auto &global = GlobalMultiOutputConfig();
-                //     // auto it = std::find_if(global.targets.begin(), global.targets.end(), [&](auto& x) { return x->id == targetid_; });
-                //     // if (it != global.targets.end()) {
-                global.targets.clear();
-				SaveMultiOutputConfig();
-                //     // }
-                //     delete this;
-                //     SaveMultiOutputConfig();
+				// GetGlobalService().RunInUIThread([this]() {
+                	global.targets.clear();
+					SaveMultiOutputConfig();
+                    // delete this;
                 // });
 			// auto &global = GlobalMultiOutputConfig();
-			auto newid = GenerateId(global);
-			auto target = std::make_shared<OutputTargetConfig>();
-			target->id = newid;
-			target->name = "YourNameHere";
-			target->serviceParam = {
-    								{"server", "rtpm://ams.streamway.in"},
-    								{"key", "132456"},
-								   };
-			global.targets.emplace_back(target);
-			auto pushwidget = createPushWidget(newid, container_);
-			itemLayout_->addWidget(pushwidget);
-				SaveConfig();
-			});
+			// auto newid = GenerateId(global);
+			// auto target = std::make_shared<OutputTargetConfig>();
+			// target->id = newid;
+			// target->name = "YourNameHere";
+			// target->serviceParam = {
+    		// 						{"server", "rtpm://ams.streamway.in"},
+    		// 						{"key", "132456"},
+			// 					   };
+			// global.targets.emplace_back(target);
+			// auto pushwidget = createPushWidget(newid, container_);
+			// itemLayout_->addWidget(pushwidget);
+			// 	SaveConfig();
+			// });
+
+			 QJsonArray destinationsArray = jsonObject["destinations"].toArray();
+    		for (const QJsonValue& destinationValue : destinationsArray) {
+        			QJsonObject destination = destinationValue.toObject();
+
+        			auto newid = GenerateId(global);
+       				auto target = std::make_shared<OutputTargetConfig>();
+        			target->id = newid;
+        			target->name = destination["platform"].toString().toStdString();
+				 // Assuming "key" is the key name for the destination
+        			target->serviceParam = {
+            			{"server", destination["url"].toString().toStdString()}, // Assuming "url" is the key name for the destination URL
+            			{"key", destination["key"].toString().toStdString()} // Assuming "platform" is the key name for the destination platform
+        			};
+        			global.targets.emplace_back(target);
+
+					auto pushwidget = createPushWidget(newid, container_);
+					itemLayout_->addWidget(pushwidget);
+					SaveConfig();
+			}	
+        // Create and add a QLabel for each destination
+        // QLabel* destinationLabel = new QLabel(QString("Destination: %1").arg(target->name));
+        // titleScheduledLayout->addWidget(destinationLabel);
+    	});
 			titleScheduledLayout->addWidget(SelectButton);
 
 			// Add the title and scheduledTime group to the item layout
@@ -767,29 +818,46 @@ newUiLayout->addWidget(buttonContainer);
 
 	void SaveConfig() { SaveMultiOutputConfig(); }
 
+void LoadConfig() {
+    for (auto x : GetAllPushWidgets()) {
+        delete x;
+    }
+    GlobalMultiOutputConfig() = {};
 
-	void LoadConfig()
-	{
-		for (auto x : GetAllPushWidgets()) {
-			delete x;
-		}
-		GlobalMultiOutputConfig() = {};
+    if (LoadMultiOutputConfig() == false) {
+        ImportLegacyMultiOutputConfig();
+    }
 
-		if (LoadMultiOutputConfig() == false) {
-			ImportLegacyMultiOutputConfig();
-		}
+    // Clear the layout to prevent duplicates
+    QLayoutItem* child;
+    while ((child = itemLayout_->takeAt(0)) != nullptr) {
+        delete child->widget();
+        delete child;
+    }
 
-		for (auto x : GlobalMultiOutputConfig().targets) {
-			auto pushwidget = createPushWidget(x->id, container_);
-			itemLayout_->addWidget(pushwidget);
-		}
-	}
+    for (auto x : GlobalMultiOutputConfig().targets) {
+        auto pushwidget = createPushWidget(x->id, container_);
+        itemLayout_->addWidget(pushwidget);
+    }
+
+    // Set up the scroll area
+    QScrollArea* scrollArea = new QScrollArea;
+    QWidget* scrollContent = new QWidget;
+    scrollContent->setLayout(itemLayout_);
+    scrollArea->setWidget(scrollContent);
+    scrollArea->setWidgetResizable(true);
+
+    // Add the scroll area to your main tab2 layout
+    tab2Layout->addWidget(scrollArea);
+}
+
 
 private:
 	QWidget *container_ = 0;
 	QScrollArea *scroll_ = 0;
 	QVBoxLayout *itemLayout_ = 0;
 	QVBoxLayout *layout_ = 0;
+	QVBoxLayout* tab2Layout = 0;
 };
 
 OBS_DECLARE_MODULE()

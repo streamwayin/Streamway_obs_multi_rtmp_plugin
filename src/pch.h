@@ -40,6 +40,7 @@
 #include "obs-module.h"
 #include "obs-frontend-api.h"
 #include "util/config-file.h"
+#include "obs.h"
 
 #define TAG "[obs-multi-rtmp] "
 
