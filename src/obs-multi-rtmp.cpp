@@ -331,6 +331,9 @@ public:
 			supportLable->setOpenExternalLinks(true);
 			horizontalLayout->addWidget(supportLable);
 			layout_->addLayout(horizontalLayout);
+			label->setWordWrap(true);
+			watchLable->setWordWrap(true);
+			supportLable->setWordWrap(true);
 		}
 
 		scroll_->setWidgetResizable(true);
@@ -349,9 +352,10 @@ QWidget* LoginWidget() {
 	QLabel* StLabel_ = new QLabel("Streamway", loginWidget);
 	LoginLayout->addWidget(StLabel_);
 
-	QLabel* sloganLabel_ = new QLabel("Get More Views By Multistreaming Directly from OBS", loginWidget);
-		layout_->addWidget(sloganLabel_);
-
+	QLabel* sloganLabel_ = new QLabel("Get More Views By Multistreaming Directly From OBS", loginWidget);
+	sloganLabel_->setStyleSheet("QLabel{font-size: 14px;font-family: Arial;}");
+	layout_->addWidget(sloganLabel_);
+	sloganLabel_->setWordWrap(true);
 	QWidget* scrollWidget = new QWidget;
 		// scrollArea->setWidgetResizable(true);
 		scrollWidget->setFixedSize(330, 500);
@@ -670,7 +674,8 @@ QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
 
             QLabel* timeLabel = new QLabel(formattedTime);
             titleScheduledLayout->addWidget(timeLabel);
-
+				timeLabel->setStyleSheet("QLabel{font-size: 16px;font-family: Arial;color: rgb(255, 255, 255);background-color: rgb(38,56,76);}");
+				titleScheduledLayout->addWidget(timeLabel);
 			QPushButton* SelectButton = new QPushButton("Select");
 			QObject::connect(SelectButton, &QPushButton::clicked, [this , jsonObject]() {
 				//obs_output_t *output_name = "rtpm://sfdfsd";
