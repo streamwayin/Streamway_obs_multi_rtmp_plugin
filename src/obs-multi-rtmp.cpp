@@ -303,9 +303,15 @@ public:
 			// auto stackedLayout = new QStackedLayout;
 		} else {
 
+		auto imageLabel = new QLabel(container_);
+		QPixmap pixmap("https://localhost:3000/src/Images/icon.png");
+		imageLabel->setPixmap(pixmap);
+
+
+
 			auto horizontalLayout = new QHBoxLayout;
 			auto label = new QLabel(
-				u8"<p><img src='https://localhost:3000/src/Images/icon.png' alt='st' />Get Your <a href=\"https://app.streamway.in/setting\">Uid and Api Key</a></p>",
+				u8"<p>Get Your <a href=\"https://app.streamway.in/setting\">Uid and Api Key</a></p>",
 				container_);
 			label->setTextFormat(Qt::RichText);
 			label->setTextInteractionFlags(
@@ -346,8 +352,8 @@ QWidget* LoginWidget() {
     QWidget* loginWidget = new QWidget;
     QVBoxLayout* LoginLayout = new QVBoxLayout(loginWidget);
 
-	QLabel* StLabel_ = new QLabel("Streamway", loginWidget);
-	LoginLayout->addWidget(StLabel_);
+	// QLabel* StLabel_ = new QLabel("Streamway", loginWidget);
+	// LoginLayout->addWidget(StLabel_);
 
 	QLabel* sloganLabel_ = new QLabel("Get More Views By Multistreaming Directly from OBS", loginWidget);
 		layout_->addWidget(sloganLabel_);
@@ -361,14 +367,14 @@ QWidget* LoginWidget() {
 		scrollWidget->setVisible(false);
 
 		// Add a label and text box for entering the uid
-		QLabel* codeLabel_ = new QLabel("Uid", container_);
-		layout_->addWidget(codeLabel_);
+		QLabel* uidLabel_ = new QLabel("Uid", container_);
+		layout_->addWidget(uidLabel_);
 
 		QLineEdit* uidLineEdit_ = new QLineEdit(container_);
 		layout_->addWidget(uidLineEdit_);
 
         // Add a label and text box for entering the code
-		codeLabel_ = new QLabel("API 123456hKey", container_);
+		QLabel* codeLabel_ = new QLabel("API Key", container_);
 		layout_->addWidget(codeLabel_);
 
 		QLineEdit* keyLineEdit_ = new QLineEdit(container_);
@@ -378,7 +384,7 @@ QWidget* LoginWidget() {
 		QPushButton* verifyButton_ = new QPushButton("Verify", container_);
 		layout_->addWidget(verifyButton_);
 
-		QObject::connect(verifyButton_, &QPushButton::clicked, [this, scrollLayout , scrollWidget , uidLineEdit_ , keyLineEdit_ ,verifyButton_ , codeLabel_]() {
+		QObject::connect(verifyButton_, &QPushButton::clicked, [this, scrollLayout , scrollWidget , uidLineEdit_ , keyLineEdit_ ,verifyButton_ , codeLabel_  , uidLabel_]() {
 			// Get the code entered by the user
 			QString uid = uidLineEdit_->text();
             QString key = keyLineEdit_->text();
@@ -398,7 +404,7 @@ QWidget* LoginWidget() {
 			networkReply = networkManager_->get(request);
 
 			// Connect to the finished signal to handle the response
-			QObject::connect(networkReply, &QNetworkReply::finished, [this, scrollLayout ,scrollWidget ,  uidLineEdit_ , keyLineEdit_ , verifyButton_ , codeLabel_ ,base64AuthHeader]() {
+			QObject::connect(networkReply, &QNetworkReply::finished, [this, scrollLayout ,scrollWidget ,  uidLineEdit_ , keyLineEdit_ , verifyButton_ , codeLabel_ ,base64AuthHeader  ,  uidLabel_]() {
 				if (networkReply->error() ==
 				    QNetworkReply::NoError) {
 					// Successful response received
@@ -439,6 +445,8 @@ QWidget* LoginWidget() {
     					 verifyButton_->setVisible(false);
 						 codeLabel_->setVisible(false);
 						 scrollWidget->setVisible(true);
+						//  StLabel_->setVisible(false);
+						 uidLabel_->setVisible(false);
 					} else {
 						// No token found in the response, indicating an invalid code
 						qDebug() << "Invalid token";
@@ -581,7 +589,7 @@ void handleSuccessfulLogin(const QString& token , QVBoxLayout *newUiLayout) {
 
 		
 
-        QLabel* tokenLabelSize = new QLabel("total broadcasts " + QString::number(jsonArray.size()));
+        QLabel* tokenLabelSize = new QLabel("Total broadcasts " + QString::number(jsonArray.size()));
         newUiLayout->addWidget(tokenLabelSize);
 
 
@@ -670,35 +678,15 @@ QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
 
             QLabel* timeLabel = new QLabel(formattedTime);
             titleScheduledLayout->addWidget(timeLabel);
-
 			QPushButton* SelectButton = new QPushButton("Select");
 			QObject::connect(SelectButton, &QPushButton::clicked, [this , jsonObject]() {
-				//obs_output_t *output_name = "rtpm://sfdfsd";
-// obs_output_t *output = obs_output_get_by_name(output_name);
-
-  //obs_output_set_service(output_name, "custom");
-
-				// obs_output_set_service( , "custom");
-                auto &global = GlobalMultiOutputConfig();
-				// GetGlobalService().RunInUIThread([this]() {
+	
+                	auto &global = GlobalMultiOutputConfig();
+				
                 	global.targets.clear();
 					SaveMultiOutputConfig();
-                    // delete this;
-                // });
-			// auto &global = GlobalMultiOutputConfig();
-			// auto newid = GenerateId(global);
-			// auto target = std::make_shared<OutputTargetConfig>();
-			// target->id = newid;
-			// target->name = "YourNameHere";
-			// target->serviceParam = {
-    		// 						{"server", "rtpm://ams.streamway.in"},
-    		// 						{"key", "132456"},
-			// 					   };
-			// global.targets.emplace_back(target);
-			// auto pushwidget = createPushWidget(newid, container_);
-			// itemLayout_->addWidget(pushwidget);
-			// 	SaveConfig();
-			// });
+					LoadConfig();
+					tab2Layout = 0;
 
 			 QJsonArray destinationsArray = jsonObject["destinations"].toArray();
     		for (const QJsonValue& destinationValue : destinationsArray) {
@@ -755,7 +743,7 @@ QObject::connect(addButton, &QPushButton::clicked,
         // QUrl url("https://app.streamway.in");
 
         // Open the URL in the user's default web browser
-        QDesktopServices::openUrl(QUrl("https://app.streamway.in"));
+        QDesktopServices::openUrl(QUrl("https://app.streamway.in/"));
 				 });
 // Create a container widget for the button layout
 QWidget* buttonContainer = new QWidget;
@@ -819,6 +807,15 @@ newUiLayout->addWidget(buttonContainer);
 	void SaveConfig() { SaveMultiOutputConfig(); }
 
 void LoadConfig() {
+	 // Clear previous pushwidgets from itemLayout_
+    while (QLayoutItem *item = itemLayout_->takeAt(0)) {
+        if (QWidget *widget = item->widget()) {
+            widget->hide(); // Optional: Hide the widget before deleting
+            delete widget;
+        }
+        delete item;
+    }
+	
     for (auto x : GetAllPushWidgets()) {
         delete x;
     }
@@ -827,28 +824,11 @@ void LoadConfig() {
     if (LoadMultiOutputConfig() == false) {
         ImportLegacyMultiOutputConfig();
     }
-
-    // Clear the layout to prevent duplicates
-    QLayoutItem* child;
-    while ((child = itemLayout_->takeAt(0)) != nullptr) {
-        delete child->widget();
-        delete child;
-    }
-
+	
     for (auto x : GlobalMultiOutputConfig().targets) {
         auto pushwidget = createPushWidget(x->id, container_);
         itemLayout_->addWidget(pushwidget);
-    }
-
-    // Set up the scroll area
-    QScrollArea* scrollArea = new QScrollArea;
-    QWidget* scrollContent = new QWidget;
-    scrollContent->setLayout(itemLayout_);
-    scrollArea->setWidget(scrollContent);
-    scrollArea->setWidgetResizable(true);
-
-    // Add the scroll area to your main tab2 layout
-    tab2Layout->addWidget(scrollArea);
+	}
 }
 
 
