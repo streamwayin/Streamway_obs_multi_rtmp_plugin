@@ -347,7 +347,7 @@ public:
 
 		setLayout(layout_);
 
-		resize(200, 400);
+		// resize(200, 400);
 	}
 
 // Function to create Tab 1 and its content
@@ -364,7 +364,7 @@ QWidget* LoginWidget() {
 	sloganLabel_->setWordWrap(true);
 	QWidget* scrollWidget = new QWidget;
 		// scrollArea->setWidgetResizable(true);
-		scrollWidget->setFixedSize(330, 500);
+		
 		// Create a layout for the widget inside the scroll area
 		QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
 		layout_->addWidget(scrollWidget);
@@ -482,6 +482,7 @@ QWidget* LoginWidget() {
 QWidget* createTab1(const QString& token) {
     QWidget* tab1 = new QWidget;
     QVBoxLayout* tab1Layout = new QVBoxLayout(tab1);
+	tab1->setFixedSize(320, 550);
 	handleSuccessfulLogin(token , tab1Layout);
     return tab1;
 };
@@ -600,8 +601,8 @@ void handleSuccessfulLogin(const QString& token , QVBoxLayout *newUiLayout) {
 		// Create a scroll area and set up a widget to contain the items
 QScrollArea* scrollArea = new QScrollArea;
 QWidget* scrollWidget = new QWidget;
-// scrollWidget->setMinimumSize(300, 400);
-scrollArea->resize(300,300);
+
+// scrollWidget->resize(300,300);
 scrollArea->setWidgetResizable(true);
 scrollArea->setWidget(scrollWidget);
 
@@ -621,10 +622,10 @@ for (const QJsonValue& jsonValue : jsonArray) {
             QVBoxLayout* titleScheduledLayout = new QVBoxLayout(titleScheduledGroup);
 
 			// Set a fixed size for the QGroupBox
-			titleScheduledGroup->setFixedSize(270, 200); // Set the desired width and height
+			titleScheduledGroup->setMinimumSize(220, 110); // Set the minimum width and height
 			// Set padding or margins for the contents of the QGroupBox
 			int leftMargin = 10; // Adjust as needed
-			int topMargin = 10;  // Adjust as needed
+			int topMargin = 0;  // Adjust as needed
 			int rightMargin = 10; // Adjust as needed
 			int bottomMargin = 10;  // Adjust as needed
 			titleScheduledLayout->setContentsMargins(leftMargin, topMargin, rightMargin, bottomMargin);
@@ -663,6 +664,8 @@ for (const QJsonValue& jsonValue : jsonArray) {
             // Show title from jsonObject
             QString title = jsonObject["title"].toString();
             QLabel* titleLabel = new QLabel(title);
+			titleLabel->setWordWrap(true);
+			titleLabel->setStyleSheet("QLabel{font-size: 15px;font-family: Arial;}"); 
             titleScheduledLayout->addWidget(titleLabel);
 
 
@@ -677,12 +680,12 @@ QDateTime scheduledTime = QDateTime::fromString(scheduledTimeStr, "yyyy-MM-ddTHH
 
 // Format the datetime as per your requirement
 QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
-			QLabel* gfgf = new QLabel("scheduledTime");
-            titleScheduledLayout->addWidget(gfgf);
+			// QLabel* gfgf = new QLabel("scheduledTime");
+            // titleScheduledLayout->addWidget(gfgf);
 
             QLabel* timeLabel = new QLabel(formattedTime);
             // titleScheduledLayout->addWidget(timeLabel);
-				timeLabel->setStyleSheet("QLabel{font-size: 16px;font-family: Arial;color: rgb(255, 255, 255);background-color: rgb(38,56,76);}");
+				timeLabel->setStyleSheet("QLabel{font-size: 12px;font-family: Arial;}");
 				titleScheduledLayout->addWidget(timeLabel);
 			QPushButton* SelectButton = new QPushButton("Select");
 			QObject::connect(SelectButton, &QPushButton::clicked, [this , jsonObject]() {
@@ -697,11 +700,15 @@ QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
 			 QJsonArray destinationsArray = jsonObject["destinations"].toArray();
     		for (const QJsonValue& destinationValue : destinationsArray) {
         			QJsonObject destination = destinationValue.toObject();
-
+					QString platformUserName = destination["platformUserName"].toString();
+            		QString platformTitle = destination["platformTitle"].toString();
+					QString title = platformUserName + " / " + platformTitle;
         			auto newid = GenerateId(global);
        				auto target = std::make_shared<OutputTargetConfig>();
         			target->id = newid;
-        			target->name = destination["platform"].toString().toStdString();
+        			// target->name = destination["platformTitle"].toString().toStdString();
+        			target->name = title.toStdString();
+
 				 // Assuming "key" is the key name for the destination
         			target->serviceParam = {
             			{"server", destination["url"].toString().toStdString()}, // Assuming "url" is the key name for the destination URL
