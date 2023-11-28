@@ -3,7 +3,7 @@
 #include <list>
 #include <regex>
 #include <filesystem>
-
+#include <vector>
 #include "push-widget.h"
 
 #include "output-config.h"
@@ -391,7 +391,101 @@ QWidget* LoginWidget() {
 		QObject::connect(verifyButton_, &QPushButton::clicked, [this, scrollLayout , scrollWidget , uidLineEdit_ , keyLineEdit_ ,verifyButton_ , codeLabel_  , uidLabel_]() {
 			// Get the code entered by the user
 			QString uid = uidLineEdit_->text();
-            QString key = keyLineEdit_->text();
+			QString key = keyLineEdit_->text();
+
+// 		std::promise<CURLcode> promise;
+// std::thread([&]() {
+//     // Initialize cURL
+//     curl_global_init(CURL_GLOBAL_DEFAULT);
+//     CURL *curl = curl_easy_init();
+// curl_slist *list = NULL; 
+//     if (curl) {
+//         // Set the request URL
+//         curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/obs/version");
+// 		list = curl_slist_append(list, "Content-Type: application/json");
+// 		QString combined = uid + ":" + key;
+//         // Perform the cURL transfer
+//         // CURLcode res = curl_easy_perform(curl);
+// 		QString base64AuthHeader = "Authorization: Basic " + combined.toUtf8().toBase64();
+// 		list = curl_slist_append(list, base64AuthHeader.toStdString().c_str());
+// 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+
+// 						auto WriteCallback = [](char* ptr, size_t size, size_t nmemb, std::string* data) -> size_t {
+// 					size_t totalSize = size * nmemb;
+// 					data->append(ptr, totalSize);
+// 					return totalSize;
+// 				};
+// 				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+
+// 				// Set the response data container
+// 				std::string responseData;
+
+// 				// Set the response data pointer
+// 				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
+
+				// Perform the request
+				// CURLcode res = curl_easy_perform(curl);
+        // Fulfill the promise with the result
+        // promise.set_value(res);
+
+        // Clean up
+//         curl_easy_cleanup(curl);
+//     }
+// }).detach();
+
+// Get a future from the promise
+// std::future<CURLcode> future = promise.get_future();
+
+			// Initialize cURL
+// 			curl_global_init(CURL_GLOBAL_DEFAULT);
+// CURL *curl = curl_easy_init();
+// curl_slist *list = NULL; // Define list outside the lambda function
+// if (curl) {
+// 				// Set the request URL
+// 				curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/obs/version");
+
+// 				// Set the request list
+// 				list = curl_slist_append(list, "Content-Type: application/json");
+// 				QString combined = uid + ":" + key;
+// 				QString base64AuthHeader = "Authorization: Basic " + combined.toUtf8().toBase64();
+// 				list = curl_slist_append(list, base64AuthHeader.toStdString().c_str());
+// 				curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+
+// 				// Set the response callback function
+// 				auto WriteCallback = [](char* ptr, size_t size, size_t nmemb, std::string* data) -> size_t {
+// 					size_t totalSize = size * nmemb;
+// 					data->append(ptr, totalSize);
+// 					return totalSize;
+// 				};
+// 				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+
+// 				// Set the response data container
+// 				std::string responseData;
+
+// 				// Set the response data pointer
+// 				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
+
+// 				// Perform the request
+// 				CURLcode res = curl_easy_perform(curl);
+
+// 				// Check for errors
+// 				if (res != CURLE_OK) {
+// 					QLabel *codeLabelcc_ = new QLabel("response data:", container_);
+// 					layout_->addWidget(codeLabelcc_);
+// 				} else {
+// 					// Print the response data
+// 					QLabel *codeLabelcc_ = new QLabel("response data:", container_);
+// 					layout_->addWidget(codeLabelcc_);
+// 				}
+
+// 				// Clean up
+// 				curl_slist_free_all(list);
+// 				curl_easy_cleanup(curl);
+// 			}
+
+			// Clean up cURL
+			// curl_global_cleanup();
+
 			QString combined = uid + ":" + key;
 			// Construct the request
 			QNetworkRequest request(QUrl("http://localhost:8000/v1/obs/version"));
@@ -414,15 +508,7 @@ QWidget* LoginWidget() {
 					// Successful response received
 					// obs_data_t *settings = obs_data_create();
 					// obs_service_t *service = obs_service_create("custom", "Custom RTMP", settings, NULL);
-					obs_data_t *settings = obs_data_create();
-					obs_data_set_string(settings, "server", "rtmp://your-custom-url.com");
-					obs_data_set_bool(settings, "use_auth", true);
-					obs_data_set_string(settings, "key", "132456");
-
-					obs_service_t *service = obs_service_create("rtmp_common", "Custom RTMP Service", settings, NULL);
-					obs_service_update(service, settings);
-
-					obs_data_release(settings);
+					
 					// Read the response data
 					QByteArray responseData =
 						networkReply->readAll();
@@ -543,6 +629,7 @@ QWidget* createTab2() {
 
 		QObject::connect(startAllButton, &QPushButton::clicked,
 				 [this]() {
+					 obs_frontend_streaming_start();
 					 for (auto x : GetAllPushWidgets())
 						 x->StartStreaming();
 				 });
@@ -690,6 +777,8 @@ QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
 			QPushButton* SelectButton = new QPushButton("Select");
 			QObject::connect(SelectButton, &QPushButton::clicked, [this , jsonObject]() {
 	
+				
+
                 	auto &global = GlobalMultiOutputConfig();
 				
                 	global.targets.clear();
@@ -698,6 +787,12 @@ QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
 					tab2Layout = 0;
 
 			 QJsonArray destinationsArray = jsonObject["destinations"].toArray();
+			 	obs_service_t *service = obs_frontend_get_streaming_service();
+    			obs_data_t *settings = obs_service_get_settings(service);
+    			// cout << obs_data_get_json_pretty(settings) << endl;
+    			obs_data_set_string(settings, "key", "1234");
+				obs_data_set_string(settings, "server", "rtmp://localhost:1935/live");
+    			obs_data_release(settings);
     		for (const QJsonValue& destinationValue : destinationsArray) {
         			QJsonObject destination = destinationValue.toObject();
 					QString platformUserName = destination["platformUserName"].toString();
@@ -819,6 +914,9 @@ newUiLayout->addWidget(buttonContainer);
 
 	void SaveConfig() { SaveMultiOutputConfig(); }
 
+
+
+
 void LoadConfig() {
 	 // Clear previous pushwidgets from itemLayout_
     while (QLayoutItem *item = itemLayout_->takeAt(0)) {
@@ -904,3 +1002,27 @@ const char *obs_module_description(void)
 {
 	return "Multiple RTMP Output Plugin";
 }
+
+
+// import obspython as obs
+ 
+// key = ''
+ 
+// def script_properties():
+//     props = obs.obs_properties_create()
+//     obs.obs_properties_add_text(props, "key", "Stream Key", obs.OBS_TEXT_DEFAULT)
+//     obs.obs_properties_add_button(props, "button", "Set", callback)
+//     return props
+ 
+// def script_update(settings):
+//     global key
+//     key = obs.obs_data_get_string(settings, 'key')
+       
+// def callback(props, prop):
+//     global key
+//     service = obs.obs_frontend_get_streaming_service()
+//     settings = obs.obs_service_get_settings(service)
+//     print(obs.obs_data_get_json_pretty(settings)) # so you can see what it actually looks like
+//     obs.obs_data_set_string(settings, 'key', key)
+//     obs.obs_data_release(settings)
+//     return False # Can also be true, doesn't matter

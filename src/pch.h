@@ -41,7 +41,9 @@
 #include "obs-frontend-api.h"
 #include "util/config-file.h"
 #include "obs.h"
-
+#include "curl/curl.h"
+#include "thread"
+#include "future"
 #define TAG "[obs-multi-rtmp] "
 
 inline std::string tostdu8(const QString& qs)
