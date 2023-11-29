@@ -787,34 +787,39 @@ QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
 					tab2Layout = 0;
 
 			 QJsonArray destinationsArray = jsonObject["destinations"].toArray();
+			 QJsonObject firstDestination = destinationsArray[0].toObject();
 			 	obs_service_t *service = obs_frontend_get_streaming_service();
     			obs_data_t *settings = obs_service_get_settings(service);
     			// cout << obs_data_get_json_pretty(settings) << endl;
-    			obs_data_set_string(settings, "key", "1234");
-				obs_data_set_string(settings, "server", "rtmp://localhost:1935/live");
+				QString url = firstDestination["url"].toString();
+				QString key = firstDestination["key"].toString();
+				obs_data_set_string(settings, "key", key.toStdString().c_str());
+				obs_data_set_string(settings, "server", url.toStdString().c_str());
     			obs_data_release(settings);
-    		for (const QJsonValue& destinationValue : destinationsArray) {
-        			QJsonObject destination = destinationValue.toObject();
-					QString platformUserName = destination["platformUserName"].toString();
-            		QString platformTitle = destination["platformTitle"].toString();
-					QString title = platformUserName + " / " + platformTitle;
-        			auto newid = GenerateId(global);
-       				auto target = std::make_shared<OutputTargetConfig>();
-        			target->id = newid;
-        			// target->name = destination["platformTitle"].toString().toStdString();
-        			target->name = title.toStdString();
 
-				 // Assuming "key" is the key name for the destination
-        			target->serviceParam = {
-            			{"server", destination["url"].toString().toStdString()}, // Assuming "url" is the key name for the destination URL
-            			{"key", destination["key"].toString().toStdString()} // Assuming "platform" is the key name for the destination platform
-        			};
-        			global.targets.emplace_back(target);
+				
+					for (int i = 1; i < destinationsArray.size(); i++) {
+        				QJsonObject destination = destinationsArray[i].toObject();
+        				QString platformUserName = destination["platformUserName"].toString();
+        				QString platformTitle = destination["platformTitle"].toString();
+        				QString title = platformUserName + " / " + platformTitle;
+        				auto newid = GenerateId(global);
+        				auto target = std::make_shared<OutputTargetConfig>();
+        				target->id = newid;
+        				target->name = title.toStdString();
+       				 	target->serviceParam = {
+            				{"server", destination["url"].toString().toStdString()},
+            				{"key", destination["key"].toString().toStdString()}
+        				};
+						target->syncStart = true;
+        				global.targets.emplace_back(target);
 
-					auto pushwidget = createPushWidget(newid, container_);
-					itemLayout_->addWidget(pushwidget);
-					SaveConfig();
-			}	
+        				auto pushwidget = createPushWidget(newid, container_);
+        				itemLayout_->addWidget(pushwidget);
+        				SaveConfig();
+    				}
+				
+    		 
         // Create and add a QLabel for each destination
         // QLabel* destinationLabel = new QLabel(QString("Destination: %1").arg(target->name));
         // titleScheduledLayout->addWidget(destinationLabel);
