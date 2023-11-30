@@ -394,28 +394,28 @@ QWidget* LoginWidget() {
 			QString key = keyLineEdit_->text();
 
 // 		std::promise<CURLcode> promise;
-// std::thread([&]() {
+//      std::thread([&]() {
 //     // Initialize cURL
 //     curl_global_init(CURL_GLOBAL_DEFAULT);
 //     CURL *curl = curl_easy_init();
-// curl_slist *list = NULL; 
+//     curl_slist *list = NULL; 
 //     if (curl) {
 //         // Set the request URL
-//         curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/obs/version");
-// 		list = curl_slist_append(list, "Content-Type: application/json");
-// 		QString combined = uid + ":" + key;
+//         curl_easy_setopt(curl, CURLOPT_URL, "https://testapi.streamway.in/v1/obs/version");
+// 		   list = curl_slist_append(list, "Content-Type: application/json");
+// 		   QString combined = uid + ":" + key;
 //         // Perform the cURL transfer
 //         // CURLcode res = curl_easy_perform(curl);
-// 		QString base64AuthHeader = "Authorization: Basic " + combined.toUtf8().toBase64();
-// 		list = curl_slist_append(list, base64AuthHeader.toStdString().c_str());
-// 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+// 		   QString base64AuthHeader = "Authorization: Basic " + combined.toUtf8().toBase64();
+// 		   list = curl_slist_append(list, base64AuthHeader.toStdString().c_str());
+// 		   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
 
-// 						auto WriteCallback = [](char* ptr, size_t size, size_t nmemb, std::string* data) -> size_t {
-// 					size_t totalSize = size * nmemb;
-// 					data->append(ptr, totalSize);
-// 					return totalSize;
-// 				};
-// 				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+// 					auto WriteCallback = [](char* ptr, size_t size, size_t nmemb, std::string* data) -> size_t {
+// 					 size_t totalSize = size * nmemb;
+// 					 data->append(ptr, totalSize);
+// 					 return totalSize;
+// 				    };
+// 		   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
 
 // 				// Set the response data container
 // 				std::string responseData;
@@ -425,24 +425,24 @@ QWidget* LoginWidget() {
 
 				// Perform the request
 				// CURLcode res = curl_easy_perform(curl);
-        // Fulfill the promise with the result
-        // promise.set_value(res);
+        		// Fulfill the promise with the result
+        		// promise.set_value(res);
 
-        // Clean up
-//         curl_easy_cleanup(curl);
-//     }
-// }).detach();
+        		// Clean up
+//         		curl_easy_cleanup(curl);
+//     		}
+// 			}).detach();
 
-// Get a future from the promise
+//       Get a future from the promise
 // std::future<CURLcode> future = promise.get_future();
 
 			// Initialize cURL
 // 			curl_global_init(CURL_GLOBAL_DEFAULT);
-// CURL *curl = curl_easy_init();
-// curl_slist *list = NULL; // Define list outside the lambda function
-// if (curl) {
+// 			CURL *curl = curl_easy_init();
+//          curl_slist *list = NULL; // Define list outside the lambda function
+//          if (curl) {
 // 				// Set the request URL
-// 				curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/obs/version");
+// 				curl_easy_setopt(curl, CURLOPT_URL, "https://testapi.streamway.in/v1/obs/version");
 
 // 				// Set the request list
 // 				list = curl_slist_append(list, "Content-Type: application/json");
