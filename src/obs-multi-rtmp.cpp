@@ -647,6 +647,33 @@ QWidget* createTab2() {
     return tab2;
 };
 
+
+// Function to create Tab 1 and its content
+QWidget* createTab3() {
+QWidget* tab3 = new QWidget;
+QVBoxLayout* tab3Layout = new QVBoxLayout(tab3);
+QString quote = "Credit -> obs-multi-rtmp plugin by sorayuki\n"
+				"This plugin is an extention of obs-multi-rtmp and it intents to empower users to multistream from within OBS itself. "
+				"Purpose of plugin is to let user schedule event from within the OBS studio itself rathar than opening multiple tabs of diffrent social platforms like youtube and facebook and manually copy pasting the keys etc. "
+				"https://github.com/sorayuki/obs-multi-rtmp";
+
+auto linkLable = new QLabel(
+				u8"<p> <a href=\"https://github.com/sorayuki/obs-multi-rtmp\"></a> </p>",
+				tab3);
+			linkLable->setTextFormat(Qt::RichText);
+			linkLable->setTextInteractionFlags(
+				Qt::TextBrowserInteraction);
+			linkLable->setOpenExternalLinks(true);				
+
+QLabel* quoteLabel = new QLabel(quote);
+quoteLabel->setWordWrap(true);
+tab3Layout->addWidget(quoteLabel);
+tab3Layout->addWidget(linkLable);
+// Add the quote label to the layout or widget where you want to display it
+tab3Layout->addWidget(quoteLabel);
+    return tab3;
+};
+
 void handleTab(const QString& token , QVBoxLayout *layout , QVBoxLayout *newUiLayout) {
 	// Create a QTabWidget to hold the tabs
 	QTabWidget* tabWidget = new QTabWidget;
@@ -654,6 +681,7 @@ void handleTab(const QString& token , QVBoxLayout *layout , QVBoxLayout *newUiLa
 	// Call the functions to create tabs and add them to the QTabWidget
     tabWidget->addTab(createTab1(token), "Broadcasts");
     tabWidget->addTab(createTab2(), "Go Live");
+	tabWidget->addTab(createTab3(), "About");
 	newUiLayout->addWidget(tabWidget);
 };
 
