@@ -48,11 +48,14 @@ class MultiOutputWidget : public QDockWidget {
 	QNetworkReply *networkReply;
 	QJsonDocument jsonDoc;
 	QJsonObject jsonObj;
+	CURL *curl;
+  	CURLcode res;
 
 public:
 	MultiOutputWidget(QWidget *parent = 0)
 		: QDockWidget(parent), reopenShown_(false)
 	{
+		
 		setWindowTitle(obs_module_text("Streamway"));
 		setFeatures(QDockWidget::DockWidgetFloatable |
 			    QDockWidget::DockWidgetMovable);
@@ -388,105 +391,24 @@ QWidget* LoginWidget() {
 		QPushButton* verifyButton_ = new QPushButton("Verify", container_);
 		layout_->addWidget(verifyButton_);
 
-		QObject::connect(verifyButton_, &QPushButton::clicked, [this, scrollLayout , scrollWidget , uidLineEdit_ , keyLineEdit_ ,verifyButton_ , codeLabel_  , uidLabel_]() {
+		QObject::connect(verifyButton_, &QPushButton::clicked, [this,scrollLayout , scrollWidget , uidLineEdit_ , keyLineEdit_ ,verifyButton_ , codeLabel_  , uidLabel_]() {
 			// Get the code entered by the user
 			QString uid = uidLineEdit_->text();
 			QString key = keyLineEdit_->text();
 
-// 		std::promise<CURLcode> promise;
-//      std::thread([&]() {
-//     // Initialize cURL
-//     curl_global_init(CURL_GLOBAL_DEFAULT);
-//     CURL *curl = curl_easy_init();
-//     curl_slist *list = NULL; 
-//     if (curl) {
-//         // Set the request URL
-//         curl_easy_setopt(curl, CURLOPT_URL, "https://testapi.streamway.in/v1/obs/version");
-// 		   list = curl_slist_append(list, "Content-Type: application/json");
-// 		   QString combined = uid + ":" + key;
-//         // Perform the cURL transfer
-//         // CURLcode res = curl_easy_perform(curl);
-// 		   QString base64AuthHeader = "Authorization: Basic " + combined.toUtf8().toBase64();
-// 		   list = curl_slist_append(list, base64AuthHeader.toStdString().c_str());
-// 		   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
-
-// 					auto WriteCallback = [](char* ptr, size_t size, size_t nmemb, std::string* data) -> size_t {
-// 					 size_t totalSize = size * nmemb;
-// 					 data->append(ptr, totalSize);
-// 					 return totalSize;
-// 				    };
-// 		   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-
-// 				// Set the response data container
-// 				std::string responseData;
-
-// 				// Set the response data pointer
-// 				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
-
-				// Perform the request
-				// CURLcode res = curl_easy_perform(curl);
-        		// Fulfill the promise with the result
-        		// promise.set_value(res);
-
-        		// Clean up
-//         		curl_easy_cleanup(curl);
-//     		}
-// 			}).detach();
-
-//       Get a future from the promise
-// std::future<CURLcode> future = promise.get_future();
-
-			// Initialize cURL
-// 			curl_global_init(CURL_GLOBAL_DEFAULT);
-// 			CURL *curl = curl_easy_init();
-//          curl_slist *list = NULL; // Define list outside the lambda function
-//          if (curl) {
-// 				// Set the request URL
-// 				curl_easy_setopt(curl, CURLOPT_URL, "https://testapi.streamway.in/v1/obs/version");
-
-// 				// Set the request list
-// 				list = curl_slist_append(list, "Content-Type: application/json");
-// 				QString combined = uid + ":" + key;
-// 				QString base64AuthHeader = "Authorization: Basic " + combined.toUtf8().toBase64();
-// 				list = curl_slist_append(list, base64AuthHeader.toStdString().c_str());
-// 				curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
-
-// 				// Set the response callback function
-// 				auto WriteCallback = [](char* ptr, size_t size, size_t nmemb, std::string* data) -> size_t {
-// 					size_t totalSize = size * nmemb;
-// 					data->append(ptr, totalSize);
-// 					return totalSize;
-// 				};
-// 				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-
-// 				// Set the response data container
-// 				std::string responseData;
-
-// 				// Set the response data pointer
-// 				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
-
-// 				// Perform the request
-// 				CURLcode res = curl_easy_perform(curl);
-
-// 				// Check for errors
-// 				if (res != CURLE_OK) {
-// 					QLabel *codeLabelcc_ = new QLabel("response data:", container_);
-// 					layout_->addWidget(codeLabelcc_);
-// 				} else {
-// 					// Print the response data
-// 					QLabel *codeLabelcc_ = new QLabel("response data:", container_);
-// 					layout_->addWidget(codeLabelcc_);
-// 				}
-
-// 				// Clean up
-// 				curl_slist_free_all(list);
-// 				curl_easy_cleanup(curl);
-// 			}
-
-			// Clean up cURL
-			// curl_global_cleanup();
-
 			QString combined = uid + ":" + key;
+
+			if(this->curl){
+				curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/obs/version");
+				res = curl_easy_perform(curl);
+				if(res){
+					QLabel* uidLabels_ = new QLabel("Uidsss", this->container_);
+					this->layout_->addWidget(uidLabels_);
+					 curl_easy_cleanup(curl);
+				}
+				  curl_global_cleanup();
+			}
+
 			// Construct the request
 			QNetworkRequest request(QUrl("http://localhost:8000/v1/obs/version"));
 			request.setHeader(QNetworkRequest::ContentTypeHeader,
