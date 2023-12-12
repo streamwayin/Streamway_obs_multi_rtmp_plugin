@@ -424,6 +424,7 @@ if(OS_MACOS)
         -change ${CMAKE_PREFIX_PATH}/lib/QtWidgets.framework/Versions/${QT_VERSION}/QtWidgets @rpath/QtWidgets.framework/Versions/${_QT_FW_VERSION}/QtWidgets \\
         -change ${CMAKE_PREFIX_PATH}/lib/QtCore.framework/Versions/${QT_VERSION}/QtCore @rpath/QtCore.framework/Versions/${_QT_FW_VERSION}/QtCore \\
         -change ${CMAKE_PREFIX_PATH}/lib/QtGui.framework/Versions/${QT_VERSION}/QtGui @rpath/QtGui.framework/Versions/${_QT_FW_VERSION}/QtGui \\
+        -change ${CMAKE_PREFIX_PATH}/lib/QtNetwork.framework/Versions/${QT_VERSION}/QtNetwork @rpath/QtNetwork.framework/Versions/${_QT_FW_VERSION}/QtNetwork
         \\\"\${CMAKE_INSTALL_PREFIX}/${target}.plugin/Contents/MacOS/${target}\\\"")
       install(CODE "execute_process(COMMAND /bin/sh -c \"${_COMMAND}\")" COMPONENT obs_plugins)
       unset(_QT_FW_VERSION)

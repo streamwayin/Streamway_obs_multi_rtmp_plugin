@@ -3,7 +3,7 @@
 #include <list>
 #include <regex>
 #include <filesystem>
-
+#include <vector>
 #include "push-widget.h"
 
 #include "output-config.h"
@@ -303,9 +303,15 @@ public:
 			// auto stackedLayout = new QStackedLayout;
 		} else {
 
+		auto imageLabel = new QLabel(container_);
+		QPixmap pixmap("https://localhost:3000/src/Images/icon.png");
+		imageLabel->setPixmap(pixmap);
+
+
+
 			auto horizontalLayout = new QHBoxLayout;
 			auto label = new QLabel(
-				u8"<p><img src='https://localhost:3000/src/Images/icon.png' alt='st' />Get Your <a href=\"https://app.streamway.in/setting\">Uid and Api Key</a></p>",
+				u8"<p>Get Your <a href=\"https://app.streamway.in/setting\">Uid and Api Key</a></p>",
 				container_);
 			label->setTextFormat(Qt::RichText);
 			label->setTextInteractionFlags(
@@ -341,7 +347,7 @@ public:
 
 		setLayout(layout_);
 
-		resize(200, 400);
+		// resize(200, 400);
 	}
 
 // Function to create Tab 1 and its content
@@ -349,8 +355,8 @@ QWidget* LoginWidget() {
     QWidget* loginWidget = new QWidget;
     QVBoxLayout* LoginLayout = new QVBoxLayout(loginWidget);
 
-	QLabel* StLabel_ = new QLabel("Streamway", loginWidget);
-	LoginLayout->addWidget(StLabel_);
+	// QLabel* StLabel_ = new QLabel("Streamway", loginWidget);
+	// LoginLayout->addWidget(StLabel_);
 
 	QLabel* sloganLabel_ = new QLabel("Get More Views By Multistreaming Directly From OBS", loginWidget);
 	sloganLabel_->setStyleSheet("QLabel{font-size: 14px;font-family: Arial;}");
@@ -358,21 +364,21 @@ QWidget* LoginWidget() {
 	sloganLabel_->setWordWrap(true);
 	QWidget* scrollWidget = new QWidget;
 		// scrollArea->setWidgetResizable(true);
-		scrollWidget->setFixedSize(330, 500);
+		
 		// Create a layout for the widget inside the scroll area
 		QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
 		layout_->addWidget(scrollWidget);
 		scrollWidget->setVisible(false);
 
 		// Add a label and text box for entering the uid
-		QLabel* codeLabel_ = new QLabel("Uid", container_);
-		layout_->addWidget(codeLabel_);
+		QLabel* uidLabel_ = new QLabel("Uid", container_);
+		layout_->addWidget(uidLabel_);
 
 		QLineEdit* uidLineEdit_ = new QLineEdit(container_);
 		layout_->addWidget(uidLineEdit_);
 
         // Add a label and text box for entering the code
-		codeLabel_ = new QLabel("API 123456hKey", container_);
+		QLabel* codeLabel_ = new QLabel("API Key", container_);
 		layout_->addWidget(codeLabel_);
 
 		QLineEdit* keyLineEdit_ = new QLineEdit(container_);
@@ -382,10 +388,104 @@ QWidget* LoginWidget() {
 		QPushButton* verifyButton_ = new QPushButton("Verify", container_);
 		layout_->addWidget(verifyButton_);
 
-		QObject::connect(verifyButton_, &QPushButton::clicked, [this, scrollLayout , scrollWidget , uidLineEdit_ , keyLineEdit_ ,verifyButton_ , codeLabel_]() {
+		QObject::connect(verifyButton_, &QPushButton::clicked, [this, scrollLayout , scrollWidget , uidLineEdit_ , keyLineEdit_ ,verifyButton_ , codeLabel_  , uidLabel_]() {
 			// Get the code entered by the user
 			QString uid = uidLineEdit_->text();
-            QString key = keyLineEdit_->text();
+			QString key = keyLineEdit_->text();
+
+// 		std::promise<CURLcode> promise;
+//      std::thread([&]() {
+//     // Initialize cURL
+//     curl_global_init(CURL_GLOBAL_DEFAULT);
+//     CURL *curl = curl_easy_init();
+//     curl_slist *list = NULL; 
+//     if (curl) {
+//         // Set the request URL
+//         curl_easy_setopt(curl, CURLOPT_URL, "https://testapi.streamway.in/v1/obs/version");
+// 		   list = curl_slist_append(list, "Content-Type: application/json");
+// 		   QString combined = uid + ":" + key;
+//         // Perform the cURL transfer
+//         // CURLcode res = curl_easy_perform(curl);
+// 		   QString base64AuthHeader = "Authorization: Basic " + combined.toUtf8().toBase64();
+// 		   list = curl_slist_append(list, base64AuthHeader.toStdString().c_str());
+// 		   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+
+// 					auto WriteCallback = [](char* ptr, size_t size, size_t nmemb, std::string* data) -> size_t {
+// 					 size_t totalSize = size * nmemb;
+// 					 data->append(ptr, totalSize);
+// 					 return totalSize;
+// 				    };
+// 		   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+
+// 				// Set the response data container
+// 				std::string responseData;
+
+// 				// Set the response data pointer
+// 				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
+
+				// Perform the request
+				// CURLcode res = curl_easy_perform(curl);
+        		// Fulfill the promise with the result
+        		// promise.set_value(res);
+
+        		// Clean up
+//         		curl_easy_cleanup(curl);
+//     		}
+// 			}).detach();
+
+//       Get a future from the promise
+// std::future<CURLcode> future = promise.get_future();
+
+			// Initialize cURL
+// 			curl_global_init(CURL_GLOBAL_DEFAULT);
+// 			CURL *curl = curl_easy_init();
+//          curl_slist *list = NULL; // Define list outside the lambda function
+//          if (curl) {
+// 				// Set the request URL
+// 				curl_easy_setopt(curl, CURLOPT_URL, "https://testapi.streamway.in/v1/obs/version");
+
+// 				// Set the request list
+// 				list = curl_slist_append(list, "Content-Type: application/json");
+// 				QString combined = uid + ":" + key;
+// 				QString base64AuthHeader = "Authorization: Basic " + combined.toUtf8().toBase64();
+// 				list = curl_slist_append(list, base64AuthHeader.toStdString().c_str());
+// 				curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+
+// 				// Set the response callback function
+// 				auto WriteCallback = [](char* ptr, size_t size, size_t nmemb, std::string* data) -> size_t {
+// 					size_t totalSize = size * nmemb;
+// 					data->append(ptr, totalSize);
+// 					return totalSize;
+// 				};
+// 				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+
+// 				// Set the response data container
+// 				std::string responseData;
+
+// 				// Set the response data pointer
+// 				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
+
+// 				// Perform the request
+// 				CURLcode res = curl_easy_perform(curl);
+
+// 				// Check for errors
+// 				if (res != CURLE_OK) {
+// 					QLabel *codeLabelcc_ = new QLabel("response data:", container_);
+// 					layout_->addWidget(codeLabelcc_);
+// 				} else {
+// 					// Print the response data
+// 					QLabel *codeLabelcc_ = new QLabel("response data:", container_);
+// 					layout_->addWidget(codeLabelcc_);
+// 				}
+
+// 				// Clean up
+// 				curl_slist_free_all(list);
+// 				curl_easy_cleanup(curl);
+// 			}
+
+			// Clean up cURL
+			// curl_global_cleanup();
+
 			QString combined = uid + ":" + key;
 			// Construct the request
 			QNetworkRequest request(QUrl("http://localhost:8000/v1/obs/version"));
@@ -402,21 +502,13 @@ QWidget* LoginWidget() {
 			networkReply = networkManager_->get(request);
 
 			// Connect to the finished signal to handle the response
-			QObject::connect(networkReply, &QNetworkReply::finished, [this, scrollLayout ,scrollWidget ,  uidLineEdit_ , keyLineEdit_ , verifyButton_ , codeLabel_ ,base64AuthHeader]() {
+			QObject::connect(networkReply, &QNetworkReply::finished, [this, scrollLayout ,scrollWidget ,  uidLineEdit_ , keyLineEdit_ , verifyButton_ , codeLabel_ ,base64AuthHeader  ,  uidLabel_]() {
 				if (networkReply->error() ==
 				    QNetworkReply::NoError) {
 					// Successful response received
 					// obs_data_t *settings = obs_data_create();
 					// obs_service_t *service = obs_service_create("custom", "Custom RTMP", settings, NULL);
-					obs_data_t *settings = obs_data_create();
-					obs_data_set_string(settings, "server", "rtmp://your-custom-url.com");
-					obs_data_set_bool(settings, "use_auth", true);
-					obs_data_set_string(settings, "key", "132456");
-
-					obs_service_t *service = obs_service_create("rtmp_common", "Custom RTMP Service", settings, NULL);
-					obs_service_update(service, settings);
-
-					obs_data_release(settings);
+					
 					// Read the response data
 					QByteArray responseData =
 						networkReply->readAll();
@@ -443,6 +535,8 @@ QWidget* LoginWidget() {
     					 verifyButton_->setVisible(false);
 						 codeLabel_->setVisible(false);
 						 scrollWidget->setVisible(true);
+						//  StLabel_->setVisible(false);
+						 uidLabel_->setVisible(false);
 					} else {
 						// No token found in the response, indicating an invalid code
 						qDebug() << "Invalid token";
@@ -474,6 +568,7 @@ QWidget* LoginWidget() {
 QWidget* createTab1(const QString& token) {
     QWidget* tab1 = new QWidget;
     QVBoxLayout* tab1Layout = new QVBoxLayout(tab1);
+	tab1->setFixedSize(320, 550);
 	handleSuccessfulLogin(token , tab1Layout);
     return tab1;
 };
@@ -534,6 +629,7 @@ QWidget* createTab2() {
 
 		QObject::connect(startAllButton, &QPushButton::clicked,
 				 [this]() {
+					 obs_frontend_streaming_start();
 					 for (auto x : GetAllPushWidgets())
 						 x->StartStreaming();
 				 });
@@ -551,6 +647,33 @@ QWidget* createTab2() {
     return tab2;
 };
 
+
+// Function to create Tab 1 and its content
+QWidget* createTab3() {
+QWidget* tab3 = new QWidget;
+QVBoxLayout* tab3Layout = new QVBoxLayout(tab3);
+QString quote = "Credit -> obs-multi-rtmp plugin by sorayuki\n"
+				"This plugin is an extention of obs-multi-rtmp and it intents to empower users to multistream from within OBS itself. "
+				"Purpose of plugin is to let user schedule event from within the OBS studio itself rathar than opening multiple tabs of diffrent social platforms like youtube and facebook and manually copy pasting the keys etc. "
+				"https://github.com/sorayuki/obs-multi-rtmp";
+
+auto linkLable = new QLabel(
+				u8"<p> <a href=\"https://github.com/sorayuki/obs-multi-rtmp\"></a> </p>",
+				tab3);
+			linkLable->setTextFormat(Qt::RichText);
+			linkLable->setTextInteractionFlags(
+				Qt::TextBrowserInteraction);
+			linkLable->setOpenExternalLinks(true);				
+
+QLabel* quoteLabel = new QLabel(quote);
+quoteLabel->setWordWrap(true);
+tab3Layout->addWidget(quoteLabel);
+tab3Layout->addWidget(linkLable);
+// Add the quote label to the layout or widget where you want to display it
+tab3Layout->addWidget(quoteLabel);
+    return tab3;
+};
+
 void handleTab(const QString& token , QVBoxLayout *layout , QVBoxLayout *newUiLayout) {
 	// Create a QTabWidget to hold the tabs
 	QTabWidget* tabWidget = new QTabWidget;
@@ -558,6 +681,7 @@ void handleTab(const QString& token , QVBoxLayout *layout , QVBoxLayout *newUiLa
 	// Call the functions to create tabs and add them to the QTabWidget
     tabWidget->addTab(createTab1(token), "Broadcasts");
     tabWidget->addTab(createTab2(), "Go Live");
+	tabWidget->addTab(createTab3(), "About");
 	newUiLayout->addWidget(tabWidget);
 };
 
@@ -585,15 +709,15 @@ void handleSuccessfulLogin(const QString& token , QVBoxLayout *newUiLayout) {
 
 		
 
-        QLabel* tokenLabelSize = new QLabel("total broadcasts " + QString::number(jsonArray.size()));
+        QLabel* tokenLabelSize = new QLabel("Total broadcasts " + QString::number(jsonArray.size()));
         newUiLayout->addWidget(tokenLabelSize);
 
 
 		// Create a scroll area and set up a widget to contain the items
 QScrollArea* scrollArea = new QScrollArea;
 QWidget* scrollWidget = new QWidget;
-// scrollWidget->setMinimumSize(300, 400);
-scrollArea->resize(300,300);
+
+// scrollWidget->resize(300,300);
 scrollArea->setWidgetResizable(true);
 scrollArea->setWidget(scrollWidget);
 
@@ -613,10 +737,10 @@ for (const QJsonValue& jsonValue : jsonArray) {
             QVBoxLayout* titleScheduledLayout = new QVBoxLayout(titleScheduledGroup);
 
 			// Set a fixed size for the QGroupBox
-			titleScheduledGroup->setFixedSize(270, 200); // Set the desired width and height
+			titleScheduledGroup->setMinimumSize(220, 110); // Set the minimum width and height
 			// Set padding or margins for the contents of the QGroupBox
 			int leftMargin = 10; // Adjust as needed
-			int topMargin = 10;  // Adjust as needed
+			int topMargin = 0;  // Adjust as needed
 			int rightMargin = 10; // Adjust as needed
 			int bottomMargin = 10;  // Adjust as needed
 			titleScheduledLayout->setContentsMargins(leftMargin, topMargin, rightMargin, bottomMargin);
@@ -655,6 +779,8 @@ for (const QJsonValue& jsonValue : jsonArray) {
             // Show title from jsonObject
             QString title = jsonObject["title"].toString();
             QLabel* titleLabel = new QLabel(title);
+			titleLabel->setWordWrap(true);
+			titleLabel->setStyleSheet("QLabel{font-size: 15px;font-family: Arial;}"); 
             titleScheduledLayout->addWidget(titleLabel);
 
 
@@ -669,61 +795,58 @@ QDateTime scheduledTime = QDateTime::fromString(scheduledTimeStr, "yyyy-MM-ddTHH
 
 // Format the datetime as per your requirement
 QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
-			QLabel* gfgf = new QLabel("scheduledTime");
-            titleScheduledLayout->addWidget(gfgf);
+			// QLabel* gfgf = new QLabel("scheduledTime");
+            // titleScheduledLayout->addWidget(gfgf);
 
             QLabel* timeLabel = new QLabel(formattedTime);
             titleScheduledLayout->addWidget(timeLabel);
-				timeLabel->setStyleSheet("QLabel{font-size: 16px;font-family: Arial;color: rgb(255, 255, 255);background-color: rgb(38,56,76);}");
-				titleScheduledLayout->addWidget(timeLabel);
+
 			QPushButton* SelectButton = new QPushButton("Select");
 			QObject::connect(SelectButton, &QPushButton::clicked, [this , jsonObject]() {
-				//obs_output_t *output_name = "rtpm://sfdfsd";
-// obs_output_t *output = obs_output_get_by_name(output_name);
+	
+				
 
-  //obs_output_set_service(output_name, "custom");
-
-				// obs_output_set_service( , "custom");
-                auto &global = GlobalMultiOutputConfig();
-				// GetGlobalService().RunInUIThread([this]() {
+                	auto &global = GlobalMultiOutputConfig();
+				
                 	global.targets.clear();
 					SaveMultiOutputConfig();
-                    // delete this;
-                // });
-			// auto &global = GlobalMultiOutputConfig();
-			// auto newid = GenerateId(global);
-			// auto target = std::make_shared<OutputTargetConfig>();
-			// target->id = newid;
-			// target->name = "YourNameHere";
-			// target->serviceParam = {
-    		// 						{"server", "rtpm://ams.streamway.in"},
-    		// 						{"key", "132456"},
-			// 					   };
-			// global.targets.emplace_back(target);
-			// auto pushwidget = createPushWidget(newid, container_);
-			// itemLayout_->addWidget(pushwidget);
-			// 	SaveConfig();
-			// });
+					LoadConfig();
+					tab2Layout = 0;
 
 			 QJsonArray destinationsArray = jsonObject["destinations"].toArray();
-    		for (const QJsonValue& destinationValue : destinationsArray) {
-        			QJsonObject destination = destinationValue.toObject();
+			 QJsonObject firstDestination = destinationsArray[0].toObject();
+			 	obs_service_t *service = obs_frontend_get_streaming_service();
+    			obs_data_t *settings = obs_service_get_settings(service);
+    			// cout << obs_data_get_json_pretty(settings) << endl;
+				QString url = firstDestination["url"].toString();
+				QString key = firstDestination["key"].toString();
+				obs_data_set_string(settings, "key", key.toStdString().c_str());
+				obs_data_set_string(settings, "server", url.toStdString().c_str());
+    			obs_data_release(settings);
 
-        			auto newid = GenerateId(global);
-       				auto target = std::make_shared<OutputTargetConfig>();
-        			target->id = newid;
-        			target->name = destination["platform"].toString().toStdString();
-				 // Assuming "key" is the key name for the destination
-        			target->serviceParam = {
-            			{"server", destination["url"].toString().toStdString()}, // Assuming "url" is the key name for the destination URL
-            			{"key", destination["key"].toString().toStdString()} // Assuming "platform" is the key name for the destination platform
-        			};
-        			global.targets.emplace_back(target);
+				
+					for (int i = 1; i < destinationsArray.size(); i++) {
+        				QJsonObject destination = destinationsArray[i].toObject();
+        				QString platformUserName = destination["platformUserName"].toString();
+        				QString platformTitle = destination["platformTitle"].toString();
+        				QString title = platformUserName + " / " + platformTitle;
+        				auto newid = GenerateId(global);
+        				auto target = std::make_shared<OutputTargetConfig>();
+        				target->id = newid;
+        				target->name = title.toStdString();
+       				 	target->serviceParam = {
+            				{"server", destination["url"].toString().toStdString()},
+            				{"key", destination["key"].toString().toStdString()}
+        				};
+						target->syncStart = true;
+        				global.targets.emplace_back(target);
 
-					auto pushwidget = createPushWidget(newid, container_);
-					itemLayout_->addWidget(pushwidget);
-					SaveConfig();
-			}	
+        				auto pushwidget = createPushWidget(newid, container_);
+        				itemLayout_->addWidget(pushwidget);
+        				SaveConfig();
+    				}
+				
+    		 
         // Create and add a QLabel for each destination
         // QLabel* destinationLabel = new QLabel(QString("Destination: %1").arg(target->name));
         // titleScheduledLayout->addWidget(destinationLabel);
@@ -760,7 +883,7 @@ QObject::connect(addButton, &QPushButton::clicked,
         // QUrl url("https://app.streamway.in");
 
         // Open the URL in the user's default web browser
-        QDesktopServices::openUrl(QUrl("https://app.streamway.in"));
+        QDesktopServices::openUrl(QUrl("https://app.streamway.in/"));
 				 });
 // Create a container widget for the button layout
 QWidget* buttonContainer = new QWidget;
@@ -823,7 +946,19 @@ newUiLayout->addWidget(buttonContainer);
 
 	void SaveConfig() { SaveMultiOutputConfig(); }
 
+
+
+
 void LoadConfig() {
+	 // Clear previous pushwidgets from itemLayout_
+    while (QLayoutItem *item = itemLayout_->takeAt(0)) {
+        if (QWidget *widget = item->widget()) {
+            widget->hide(); // Optional: Hide the widget before deleting
+            delete widget;
+        }
+        delete item;
+    }
+	
     for (auto x : GetAllPushWidgets()) {
         delete x;
     }
@@ -832,28 +967,11 @@ void LoadConfig() {
     if (LoadMultiOutputConfig() == false) {
         ImportLegacyMultiOutputConfig();
     }
-
-    // Clear the layout to prevent duplicates
-    QLayoutItem* child;
-    while ((child = itemLayout_->takeAt(0)) != nullptr) {
-        delete child->widget();
-        delete child;
-    }
-
+	
     for (auto x : GlobalMultiOutputConfig().targets) {
         auto pushwidget = createPushWidget(x->id, container_);
         itemLayout_->addWidget(pushwidget);
-    }
-
-    // Set up the scroll area
-    QScrollArea* scrollArea = new QScrollArea;
-    QWidget* scrollContent = new QWidget;
-    scrollContent->setLayout(itemLayout_);
-    scrollArea->setWidget(scrollContent);
-    scrollArea->setWidgetResizable(true);
-
-    // Add the scroll area to your main tab2 layout
-    tab2Layout->addWidget(scrollArea);
+	}
 }
 
 
@@ -916,3 +1034,27 @@ const char *obs_module_description(void)
 {
 	return "Multiple RTMP Output Plugin";
 }
+
+
+// import obspython as obs
+ 
+// key = ''
+ 
+// def script_properties():
+//     props = obs.obs_properties_create()
+//     obs.obs_properties_add_text(props, "key", "Stream Key", obs.OBS_TEXT_DEFAULT)
+//     obs.obs_properties_add_button(props, "button", "Set", callback)
+//     return props
+ 
+// def script_update(settings):
+//     global key
+//     key = obs.obs_data_get_string(settings, 'key')
+       
+// def callback(props, prop):
+//     global key
+//     service = obs.obs_frontend_get_streaming_service()
+//     settings = obs.obs_service_get_settings(service)
+//     print(obs.obs_data_get_json_pretty(settings)) # so you can see what it actually looks like
+//     obs.obs_data_set_string(settings, 'key', key)
+//     obs.obs_data_release(settings)
+//     return False # Can also be true, doesn't matter
