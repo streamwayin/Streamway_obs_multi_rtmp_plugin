@@ -42,6 +42,10 @@
 #include "util/config-file.h"
 #include "obs.h"
 #include "curl/curl.h"
+#include <string>
+#include <iostream>
+#include <nlohmann/json.hpp>
+
 #include "thread"
 #include "future"
 #define TAG "[obs-multi-rtmp] "

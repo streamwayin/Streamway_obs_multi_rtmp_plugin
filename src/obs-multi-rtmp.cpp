@@ -14,6 +14,8 @@
 
 #define ConfigSection "obs-multi-rtmp"
 
+using Json = nlohmann::json;
+
 static class GlobalServiceImpl : public GlobalService {
 public:
 	bool RunInUIThread(std::function<void()> task) override
@@ -397,437 +399,483 @@ QWidget* LoginWidget() {
 			QString key = keyLineEdit_->text();
 
 			QString combined = uid + ":" + key;
+			//  if (!this->curl) {
+           	// 	 // Handle curl initialization error
+			// 	qDebug() << "Network error: ";
+            // 	return;
+        	// }
+			//  if(this->curl) {
 
-			if(this->curl){
-				curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/obs/version");
-				res = curl_easy_perform(curl);
-				if(res){
-					QLabel* uidLabels_ = new QLabel("Uidsss", this->container_);
-					this->layout_->addWidget(uidLabels_);
-					 curl_easy_cleanup(curl);
-				}
-				  curl_global_cleanup();
-			}
+				// qDebug() << "curl is ready!";
+        // Set URL for the request
+        // curl_easy_setopt(this->curl, CURLOPT_URL, "http://localhost:8000/v1/obs/version");
+        // Response buffer
+        // char response[1024];
+        // size_t bufferSize = sizeof(response);
 
-			// Construct the request
-			QNetworkRequest request(QUrl("http://localhost:8000/v1/obs/version"));
-			request.setHeader(QNetworkRequest::ContentTypeHeader,
-					  "application/json");
+        // // Write response to buffer
+      
+        // curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+        // // Perform the request
+        //  this->res = curl_easy_perform(this->curl);
+        // // Clean up libcurl
+        // curl_easy_cleanup(this->curl);
+		// if (res != CURLE_OK) {
+        //     // Handle curl error
+        //     QString errorMessage = curl_easy_strerror(res);
+        //     qDebug() << "response error";
+		// 	qDebug() << errorMessage;
+        //     return;
+        // }
+        // if(this->res == CURLE_OK) {
+        //     long response_code;
+        //     curl_easy_getinfo(this->curl, CURLINFO_RESPONSE_CODE, &response_code);
+            
+        //     if(response_code == 200) {
+        //         QLabel* uidLabels_ = new QLabel("Uidsss", this->container_);
+        //         this->layout_->addWidget(uidLabels_);
+                
+        //     } else {
+		// 		QLabel* uidLabels_ = new QLabel("Uidsss", this->container_);
+        //         this->layout_->addWidget(uidLabels_); // Show invalid token error in codeLabel_
+		// 		return;
+        //     }
+        // } else {
+        //     // Handle request failure
+		// 	QLabel* uidLabels_ = new QLabel("Uidsss", this->container_);
+        //     this->layout_->addWidget(uidLabels_);
+		// 	return;
+        // }
 
-			// Create a QNetworkAccessManager for making the HTTP request
-			networkManager_ = new QNetworkAccessManager(this);
-
-			QByteArray combinedData = combined.toUtf8().toBase64();
-			QString base64AuthHeader = "Basic " + QString(combinedData);
-			request.setRawHeader("Authorization", base64AuthHeader.toUtf8());
-			// Send the POST request
-			networkReply = networkManager_->get(request);
-
-			// Connect to the finished signal to handle the response
-			QObject::connect(networkReply, &QNetworkReply::finished, [this, scrollLayout ,scrollWidget ,  uidLineEdit_ , keyLineEdit_ , verifyButton_ , codeLabel_ ,base64AuthHeader  ,  uidLabel_]() {
-				if (networkReply->error() ==
-				    QNetworkReply::NoError) {
-					// Successful response received
-					// obs_data_t *settings = obs_data_create();
-					// obs_service_t *service = obs_service_create("custom", "Custom RTMP", settings, NULL);
-					
-					// Read the response data
-					QByteArray responseData =
-						networkReply->readAll();
-
-					// TODO: Parse the response data to extract the token
-					// Assuming the response contains a JSON object with a "token" field
-					jsonDoc = QJsonDocument::fromJson(
-						responseData);
-					jsonObj = jsonDoc.object();
-
-					if (jsonObj.contains("success")) {
-						QString token =
-							jsonObj["success"]
-								.toString();
-
-						// You have a valid token
-						// You can use 'token' as needed
-						qDebug() << "Token: " << token;
-						handleTab(base64AuthHeader , layout_ , scrollLayout);
-						// handleSuccessfulLogin(token ,  scrollLayout);
-						// Hide the verification UI
-            			 uidLineEdit_->setVisible(false);
-    					 keyLineEdit_->setVisible(false);
-    					 verifyButton_->setVisible(false);
-						 codeLabel_->setVisible(false);
-						 scrollWidget->setVisible(true);
-						//  StLabel_->setVisible(false);
-						 uidLabel_->setVisible(false);
-					} else {
-						// No token found in the response, indicating an invalid code
-						qDebug() << "Invalid token";
-						QLabel *codeLabela_ = new QLabel(
-							"Invalid token:",
-							container_);
-						layout_->addWidget(codeLabela_);
-					}
-				} else {
-					// Handle the network error here
-					qDebug() << "Network error: "
-						 << networkReply->errorString();
-					QLabel *codeLabelc_ = new QLabel(
-						networkReply->errorString(),
-						container_);
-					layout_->addWidget(codeLabelc_);
-				}
-
-				// Clean up the network resources
-				networkReply->deleteLater();
-			});
+        
+    // }
+    			// curl_global_cleanup();
+				 std::string url = "https://api.example.com/endpoint";
+  std::string authHeader = "Authorization: Bearer YOUR_API_KEY";
+  std::string jsonData = "{\"key\": \"value\"}";
+  std::string response;
+ 
+  // Send the HTTP request
+  if (!sendHttpRequest(url, authHeader, jsonData, response)) {
+    // cerr << "Error sending request!";
+    return 1;
+  };
+ 
+  // Parse the JSON response
+//   Json::Value root;
+//   Json::Reader reader;
+//   if (!reader.parse(response, root)) {
+//     cerr << "Error parsing JSON response!" << endl;
+//     return 1;
+//   }
+ 
+  // Access data from the response
+//   std::string data = root["data"].asString();
+//   cout << "Data received: " << data << endl;
+	// sendHttpRequest(url , authHeader , jsonData , response);
+			
 		});
 
     return loginWidget;
 };
 
+// Define the callback function to capture response data
+size_t writeCallback(void *ptr, size_t size, size_t nmemb, void *stream) {
+  std::string *data = (std::string *)stream;
+  data->append((char *)ptr, size * nmemb);
+  return size * nmemb;
+};
+ 
+// Function to send an HTTP request and parse JSON response
+bool sendHttpRequest( std::string &url,  std::string &authHeader,  std::string &jsonData, std::string &response) {
+  CURL *curl;
+  CURLcode res;
+ 
+  // Initialize curl
+  curl = curl_easy_init();
+  if (!curl) {
+    return false;
+  };
+ 
+  // Set the URL
+  curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/obs/version");
+ 
+  // Set the request method to POST
+  curl_easy_setopt(curl, CURLOPT_POST, 1L);
+ 
+  // Set the JSON data as the POST fields
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonData.c_str());
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, jsonData.length());
+ 
+  // Set the authentication header
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, &authHeader);
+ 
+  // Set the write callback to capture the response
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &MultiOutputWidget::writeCallback);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+ 
+  // Perform the request
+  res = curl_easy_perform(curl);
+ 
+  // Check for errors
+  if (res != CURLE_OK) {
+    curl_easy_cleanup(curl);
+    return false;
+  }
+ 
+  // Cleanup curl
+  curl_easy_cleanup(curl);
+ 
+  return true;
+}
+ 
+// int main() {
+  // Replace these with your actual values
+ 
+ 
 
 // Function to create Tab 1 and its content
-QWidget* createTab1(const QString& token) {
-    QWidget* tab1 = new QWidget;
-    QVBoxLayout* tab1Layout = new QVBoxLayout(tab1);
-	tab1->setFixedSize(320, 550);
-	handleSuccessfulLogin(token , tab1Layout);
-    return tab1;
-};
+// QWidget* createTab1(const QString& token) {
+//     QWidget* tab1 = new QWidget;
+//     QVBoxLayout* tab1Layout = new QVBoxLayout(tab1);
+// 	tab1->setFixedSize(320, 550);
+// 	handleSuccessfulLogin(token , tab1Layout);
+//     return tab1;
+// };
 
 // Function to create Tab 2 and its content
-QWidget* createTab2() {
-	// QScrollArea* scrollArea = new QScrollArea;
-    QWidget* tab2 = new QWidget;
-    tab2Layout = new QVBoxLayout(tab2);
+// QWidget* createTab2() {
+// 	// QScrollArea* scrollArea = new QScrollArea;
+//     QWidget* tab2 = new QWidget;
+//     tab2Layout = new QVBoxLayout(tab2);
 	
-	// scrollArea->resize(300,300);
-	// scrollArea->setWidgetResizable(true);
-	// scrollArea->setWidget(tab2);
+// 	// scrollArea->resize(300,300);
+// 	// scrollArea->setWidgetResizable(true);
+// 	// scrollArea->setWidget(tab2);
 
-    // tab2->setFixedSize(320, 600);
-	// tab2Layout->addWidget(scrollArea);
-	// init widget
-		auto addButton = new QPushButton(
-			obs_module_text("Btn.NewTarget"), container_);
-		QObject::connect(addButton, &QPushButton::clicked, [this]() {
-			auto &global = GlobalMultiOutputConfig();
-			auto newid = GenerateId(global);
-			auto target = std::make_shared<OutputTargetConfig>();
-			target->id = newid;
-			global.targets.emplace_back(target);
+//     // tab2->setFixedSize(320, 600);
+// 	// tab2Layout->addWidget(scrollArea);
+// 	// init widget
+// 		auto addButton = new QPushButton(
+// 			obs_module_text("Btn.NewTarget"), container_);
+// 		QObject::connect(addButton, &QPushButton::clicked, [this]() {
+// 			auto &global = GlobalMultiOutputConfig();
+// 			auto newid = GenerateId(global);
+// 			auto target = std::make_shared<OutputTargetConfig>();
+// 			target->id = newid;
+// 			global.targets.emplace_back(target);
 
-			auto pushwidget = createPushWidget(newid, container_);
-			itemLayout_->addWidget(pushwidget);
+// 			auto pushwidget = createPushWidget(newid, container_);
+// 			itemLayout_->addWidget(pushwidget);
 			
 
-			if (pushwidget->ShowEditDlg())
-				SaveConfig();
-			else {
-				auto it = std::find_if(global.targets.begin(),
-						       global.targets.end(),
-						       [newid](auto &x) {
-							       return x->id ==
-								      newid;
-						       });
-				if (it != global.targets.end())
-					global.targets.erase(it);
-				delete pushwidget;
-			}
-		});
-		tab2Layout->addWidget(addButton);
+// 			if (pushwidget->ShowEditDlg())
+// 				SaveConfig();
+// 			else {
+// 				auto it = std::find_if(global.targets.begin(),
+// 						       global.targets.end(),
+// 						       [newid](auto &x) {
+// 							       return x->id ==
+// 								      newid;
+// 						       });
+// 				if (it != global.targets.end())
+// 					global.targets.erase(it);
+// 				delete pushwidget;
+// 			}
+// 		});
+// 		tab2Layout->addWidget(addButton);
 
-		// start all, stop all
-		auto allBtnContainer = new QWidget(this);
-		auto allBtnLayout = new QHBoxLayout(allBtnContainer);
-		auto startAllButton = new QPushButton(
-			obs_module_text("Btn.StartAll"), allBtnContainer);
-		allBtnLayout->addWidget(startAllButton);
-		auto stopAllButton = new QPushButton(
-			obs_module_text("Btn.StopAll"), allBtnContainer);
-		allBtnLayout->addWidget(stopAllButton);
-		allBtnContainer->setLayout(allBtnLayout);
-		tab2Layout->addWidget(allBtnContainer);
+// 		// start all, stop all
+// 		auto allBtnContainer = new QWidget(this);
+// 		auto allBtnLayout = new QHBoxLayout(allBtnContainer);
+// 		auto startAllButton = new QPushButton(
+// 			obs_module_text("Btn.StartAll"), allBtnContainer);
+// 		allBtnLayout->addWidget(startAllButton);
+// 		auto stopAllButton = new QPushButton(
+// 			obs_module_text("Btn.StopAll"), allBtnContainer);
+// 		allBtnLayout->addWidget(stopAllButton);
+// 		allBtnContainer->setLayout(allBtnLayout);
+// 		tab2Layout->addWidget(allBtnContainer);
 
-		QObject::connect(startAllButton, &QPushButton::clicked,
-				 [this]() {
-					 obs_frontend_streaming_start();
-					 for (auto x : GetAllPushWidgets())
-						 x->StartStreaming();
-				 });
-		QObject::connect(stopAllButton, &QPushButton::clicked,
-				 [this]() {
-					 for (auto x : GetAllPushWidgets())
-						 x->StopStreaming();
-				 });
+// 		QObject::connect(startAllButton, &QPushButton::clicked,
+// 				 [this]() {
+// 					 obs_frontend_streaming_start();
+// 					 for (auto x : GetAllPushWidgets())
+// 						 x->StartStreaming();
+// 				 });
+// 		QObject::connect(stopAllButton, &QPushButton::clicked,
+// 				 [this]() {
+// 					 for (auto x : GetAllPushWidgets())
+// 						 x->StopStreaming();
+// 				 });
 
-		// load config
-		itemLayout_ = new QVBoxLayout(tab2);
-		LoadConfig();
-		tab2Layout->addLayout(itemLayout_);
+// 		// load config
+// 		itemLayout_ = new QVBoxLayout(tab2);
+// 		LoadConfig();
+// 		tab2Layout->addLayout(itemLayout_);
 
-    return tab2;
-};
+//     return tab2;
+// };
 
 
-// Function to create Tab 1 and its content
-QWidget* createTab3() {
-QWidget* tab3 = new QWidget;
-QVBoxLayout* tab3Layout = new QVBoxLayout(tab3);
-QString quote = "Credit -> obs-multi-rtmp plugin by sorayuki\n"
-				"This plugin is an extention of obs-multi-rtmp and it intents to empower users to multistream from within OBS itself. "
-				"Purpose of plugin is to let user schedule event from within the OBS studio itself rathar than opening multiple tabs of diffrent social platforms like youtube and facebook and manually copy pasting the keys etc. "
-				"https://github.com/sorayuki/obs-multi-rtmp";
+// // Function to create Tab 1 and its content
+// QWidget* createTab3() {
+// QWidget* tab3 = new QWidget;
+// QVBoxLayout* tab3Layout = new QVBoxLayout(tab3);
+// QString quote = "Credit -> obs-multi-rtmp plugin by sorayuki\n"
+// 				"This plugin is an extention of obs-multi-rtmp and it intents to empower users to multistream from within OBS itself. "
+// 				"Purpose of plugin is to let user schedule event from within the OBS studio itself rathar than opening multiple tabs of diffrent social platforms like youtube and facebook and manually copy pasting the keys etc. "
+// 				"https://github.com/sorayuki/obs-multi-rtmp";
 
-auto linkLable = new QLabel(
-				u8"<p> <a href=\"https://github.com/sorayuki/obs-multi-rtmp\"></a> </p>",
-				tab3);
-			linkLable->setTextFormat(Qt::RichText);
-			linkLable->setTextInteractionFlags(
-				Qt::TextBrowserInteraction);
-			linkLable->setOpenExternalLinks(true);				
+// auto linkLable = new QLabel(
+// 				u8"<p> <a href=\"https://github.com/sorayuki/obs-multi-rtmp\"></a> </p>",
+// 				tab3);
+// 			linkLable->setTextFormat(Qt::RichText);
+// 			linkLable->setTextInteractionFlags(
+// 				Qt::TextBrowserInteraction);
+// 			linkLable->setOpenExternalLinks(true);				
 
-QLabel* quoteLabel = new QLabel(quote);
-quoteLabel->setWordWrap(true);
-tab3Layout->addWidget(quoteLabel);
-tab3Layout->addWidget(linkLable);
-// Add the quote label to the layout or widget where you want to display it
-tab3Layout->addWidget(quoteLabel);
-    return tab3;
-};
+// QLabel* quoteLabel = new QLabel(quote);
+// quoteLabel->setWordWrap(true);
+// tab3Layout->addWidget(quoteLabel);
+// tab3Layout->addWidget(linkLable);
+// // Add the quote label to the layout or widget where you want to display it
+// tab3Layout->addWidget(quoteLabel);
+//     return tab3;
+// };
 
-void handleTab(const QString& token , QVBoxLayout *layout , QVBoxLayout *newUiLayout) {
-	// Create a QTabWidget to hold the tabs
-	QTabWidget* tabWidget = new QTabWidget;
+// void handleTab(const QString& token , QVBoxLayout *layout , QVBoxLayout *newUiLayout) {
+// 	// Create a QTabWidget to hold the tabs
+// 	QTabWidget* tabWidget = new QTabWidget;
 
-	// Call the functions to create tabs and add them to the QTabWidget
-    tabWidget->addTab(createTab1(token), "Broadcasts");
-    tabWidget->addTab(createTab2(), "Go Live");
-	tabWidget->addTab(createTab3(), "About");
-	newUiLayout->addWidget(tabWidget);
-};
+// 	// Call the functions to create tabs and add them to the QTabWidget
+//     tabWidget->addTab(createTab1(token), "Broadcasts");
+//     tabWidget->addTab(createTab2(), "Go Live");
+// 	tabWidget->addTab(createTab3(), "About");
+// 	newUiLayout->addWidget(tabWidget);
+// };
 
-void handleSuccessfulLogin(const QString& token , QVBoxLayout *newUiLayout) {
+// void handleSuccessfulLogin(const QString& token , QVBoxLayout *newUiLayout) {
 
-    QNetworkRequest request(QUrl("http://localhost:8000/v1/broadcasts/upcoming"));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+//     QNetworkRequest request(QUrl("http://localhost:8000/v1/broadcasts/upcoming"));
+//     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    request.setRawHeader("Authorization", token.toUtf8());
+//     request.setRawHeader("Authorization", token.toUtf8());
    
 
-    QNetworkAccessManager networkManager;
-    QNetworkReply* networkReply = networkManager.get(request);
+//     QNetworkAccessManager networkManager;
+//     QNetworkReply* networkReply = networkManager.get(request);
 
-    // Create an event loop to wait for the network request to finish
-    QEventLoop eventLoop;
-    QObject::connect(&networkManager, &QNetworkAccessManager::finished, &eventLoop, &QEventLoop::quit);
+//     // Create an event loop to wait for the network request to finish
+//     QEventLoop eventLoop;
+//     QObject::connect(&networkManager, &QNetworkAccessManager::finished, &eventLoop, &QEventLoop::quit);
 
-    eventLoop.exec(); // This will block until the network request finishes
+//     eventLoop.exec(); // This will block until the network request finishes
 
-    if (networkReply->error() == QNetworkReply::NoError) {
-        QByteArray responseData = networkReply->readAll();
-        QJsonDocument jsonDoc = QJsonDocument::fromJson(responseData);
-        QJsonArray jsonArray = jsonDoc.array();
+//     if (networkReply->error() == QNetworkReply::NoError) {
+//         QByteArray responseData = networkReply->readAll();
+//         QJsonDocument jsonDoc = QJsonDocument::fromJson(responseData);
+//         QJsonArray jsonArray = jsonDoc.array();
 
 		
 
-        QLabel* tokenLabelSize = new QLabel("Total broadcasts " + QString::number(jsonArray.size()));
-        newUiLayout->addWidget(tokenLabelSize);
+//         QLabel* tokenLabelSize = new QLabel("Total broadcasts " + QString::number(jsonArray.size()));
+//         newUiLayout->addWidget(tokenLabelSize);
 
 
-		// Create a scroll area and set up a widget to contain the items
-QScrollArea* scrollArea = new QScrollArea;
-QWidget* scrollWidget = new QWidget;
+// 		// Create a scroll area and set up a widget to contain the items
+// QScrollArea* scrollArea = new QScrollArea;
+// QWidget* scrollWidget = new QWidget;
 
-// scrollWidget->resize(300,300);
-scrollArea->setWidgetResizable(true);
-scrollArea->setWidget(scrollWidget);
+// // scrollWidget->resize(300,300);
+// scrollArea->setWidgetResizable(true);
+// scrollArea->setWidget(scrollWidget);
 
-// Create a layout for the widget inside the scroll area
-QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
+// // Create a layout for the widget inside the scroll area
+// QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
 
-for (const QJsonValue& jsonValue : jsonArray) {
-    if (jsonValue.isObject()) {
-        QJsonObject jsonObject = jsonValue.toObject();
-        if (jsonObject.contains("title")) {
-            // Create a custom widget to represent each item
-            QWidget* itemWidget = new QWidget;
-            QVBoxLayout* itemLayout = new QVBoxLayout(itemWidget);
+// for (const QJsonValue& jsonValue : jsonArray) {
+//     if (jsonValue.isObject()) {
+//         QJsonObject jsonObject = jsonValue.toObject();
+//         if (jsonObject.contains("title")) {
+//             // Create a custom widget to represent each item
+//             QWidget* itemWidget = new QWidget;
+//             QVBoxLayout* itemLayout = new QVBoxLayout(itemWidget);
 
-			// Create a group for title and scheduledTime
-            QGroupBox* titleScheduledGroup = new QGroupBox;
-            QVBoxLayout* titleScheduledLayout = new QVBoxLayout(titleScheduledGroup);
+// 			// Create a group for title and scheduledTime
+//             QGroupBox* titleScheduledGroup = new QGroupBox;
+//             QVBoxLayout* titleScheduledLayout = new QVBoxLayout(titleScheduledGroup);
 
-			// Set a fixed size for the QGroupBox
-			titleScheduledGroup->setMinimumSize(220, 110); // Set the minimum width and height
-			// Set padding or margins for the contents of the QGroupBox
-			int leftMargin = 10; // Adjust as needed
-			int topMargin = 0;  // Adjust as needed
-			int rightMargin = 10; // Adjust as needed
-			int bottomMargin = 10;  // Adjust as needed
-			titleScheduledLayout->setContentsMargins(leftMargin, topMargin, rightMargin, bottomMargin);
+// 			// Set a fixed size for the QGroupBox
+// 			titleScheduledGroup->setMinimumSize(220, 110); // Set the minimum width and height
+// 			// Set padding or margins for the contents of the QGroupBox
+// 			int leftMargin = 10; // Adjust as needed
+// 			int topMargin = 0;  // Adjust as needed
+// 			int rightMargin = 10; // Adjust as needed
+// 			int bottomMargin = 10;  // Adjust as needed
+// 			titleScheduledLayout->setContentsMargins(leftMargin, topMargin, rightMargin, bottomMargin);
 
-			// Retrieve the image URL from the jsonObject
-			QString imageUrl = jsonObject["thumbnail"].toString();
-            // Show jsonObject thumbnail field in an image (Assuming you have a QLabel for this)
-            QLabel* thumbnailLabel = new QLabel;
+// 			// Retrieve the image URL from the jsonObject
+// 			QString imageUrl = jsonObject["thumbnail"].toString();
+//             // Show jsonObject thumbnail field in an image (Assuming you have a QLabel for this)
+//             QLabel* thumbnailLabel = new QLabel;
             
 			
-			thumbnailLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-			QNetworkAccessManager networkManager;
-			// Create a QUrl object with the image URL
-			QUrl url(imageUrl);
+// 			thumbnailLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+// 			QNetworkAccessManager networkManager;
+// 			// Create a QUrl object with the image URL
+// 			QUrl url(imageUrl);
 
-			QNetworkRequest request(url);
-			QNetworkReply* reply = networkManager.get(request);
+// 			QNetworkRequest request(url);
+// 			QNetworkReply* reply = networkManager.get(request);
 
-			// Handle the image loading asynchronously
-			QObject::connect(reply, &QNetworkReply::finished, [=]() {
-    if (reply->error() == QNetworkReply::NoError) {
-        QByteArray imageData = reply->readAll();
-        QImage thumbnail;
-        thumbnail.loadFromData(imageData); // Load image data into the QImage instance
-        QPixmap pixmap = QPixmap::fromImage(thumbnail);
-        thumbnailLabel->setPixmap(pixmap);
-    } else {
-        qDebug() << "Failed to load image:" << reply->errorString();
-    }
-    reply->deleteLater();
-});
+// 			// Handle the image loading asynchronously
+// 			QObject::connect(reply, &QNetworkReply::finished, [=]() {
+//     if (reply->error() == QNetworkReply::NoError) {
+//         QByteArray imageData = reply->readAll();
+//         QImage thumbnail;
+//         thumbnail.loadFromData(imageData); // Load image data into the QImage instance
+//         QPixmap pixmap = QPixmap::fromImage(thumbnail);
+//         thumbnailLabel->setPixmap(pixmap);
+//     } else {
+//         qDebug() << "Failed to load image:" << reply->errorString();
+//     }
+//     reply->deleteLater();
+// });
 
 
 			
-			titleScheduledLayout->addWidget(thumbnailLabel); // Add the image label
-            // Show title from jsonObject
-            QString title = jsonObject["title"].toString();
-            QLabel* titleLabel = new QLabel(title);
-			titleLabel->setWordWrap(true);
-			titleLabel->setStyleSheet("QLabel{font-size: 15px;font-family: Arial;}"); 
-            titleScheduledLayout->addWidget(titleLabel);
+// 			titleScheduledLayout->addWidget(thumbnailLabel); // Add the image label
+//             // Show title from jsonObject
+//             QString title = jsonObject["title"].toString();
+//             QLabel* titleLabel = new QLabel(title);
+// 			titleLabel->setWordWrap(true);
+// 			titleLabel->setStyleSheet("QLabel{font-size: 15px;font-family: Arial;}"); 
+//             titleScheduledLayout->addWidget(titleLabel);
 
 
-            // Show scheduledTime from jsonObject
-            QString scheduledTimeStr = jsonObject["scheduledTime"].toString();
-			// scheduledTimeStr.resize(10);
+//             // Show scheduledTime from jsonObject
+//             QString scheduledTimeStr = jsonObject["scheduledTime"].toString();
+// 			// scheduledTimeStr.resize(10);
 
-			// QString scheduledTimeStr = "2023-11-06T16:24";
+// 			// QString scheduledTimeStr = "2023-11-06T16:24";
 
-// Parse the input string
-QDateTime scheduledTime = QDateTime::fromString(scheduledTimeStr, "yyyy-MM-ddTHH:mm");
+// // Parse the input string
+// QDateTime scheduledTime = QDateTime::fromString(scheduledTimeStr, "yyyy-MM-ddTHH:mm");
 
-// Format the datetime as per your requirement
-QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
-			// QLabel* gfgf = new QLabel("scheduledTime");
-            // titleScheduledLayout->addWidget(gfgf);
+// // Format the datetime as per your requirement
+// QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
+// 			// QLabel* gfgf = new QLabel("scheduledTime");
+//             // titleScheduledLayout->addWidget(gfgf);
 
-            QLabel* timeLabel = new QLabel(formattedTime);
-            // titleScheduledLayout->addWidget(timeLabel);
-				timeLabel->setStyleSheet("QLabel{font-size: 12px;font-family: Arial;}");
-				titleScheduledLayout->addWidget(timeLabel);
-			QPushButton* SelectButton = new QPushButton("Select");
-			QObject::connect(SelectButton, &QPushButton::clicked, [this , jsonObject]() {
+//             QLabel* timeLabel = new QLabel(formattedTime);
+//             // titleScheduledLayout->addWidget(timeLabel);
+// 				timeLabel->setStyleSheet("QLabel{font-size: 12px;font-family: Arial;}");
+// 				titleScheduledLayout->addWidget(timeLabel);
+// 			QPushButton* SelectButton = new QPushButton("Select");
+// 			QObject::connect(SelectButton, &QPushButton::clicked, [this , jsonObject]() {
 	
 				
 
-                	auto &global = GlobalMultiOutputConfig();
+//                 	auto &global = GlobalMultiOutputConfig();
 				
-                	global.targets.clear();
-					SaveMultiOutputConfig();
-					LoadConfig();
-					tab2Layout = 0;
+//                 	global.targets.clear();
+// 					SaveMultiOutputConfig();
+// 					LoadConfig();
+// 					tab2Layout = 0;
 
-			 QJsonArray destinationsArray = jsonObject["destinations"].toArray();
-			 QJsonObject firstDestination = destinationsArray[0].toObject();
-			 	obs_service_t *service = obs_frontend_get_streaming_service();
-    			obs_data_t *settings = obs_service_get_settings(service);
-    			// cout << obs_data_get_json_pretty(settings) << endl;
-				QString url = firstDestination["url"].toString();
-				QString key = firstDestination["key"].toString();
-				obs_data_set_string(settings, "key", key.toStdString().c_str());
-				obs_data_set_string(settings, "server", url.toStdString().c_str());
-    			obs_data_release(settings);
+// 			 QJsonArray destinationsArray = jsonObject["destinations"].toArray();
+// 			 QJsonObject firstDestination = destinationsArray[0].toObject();
+// 			 	obs_service_t *service = obs_frontend_get_streaming_service();
+//     			obs_data_t *settings = obs_service_get_settings(service);
+//     			// cout << obs_data_get_json_pretty(settings) << endl;
+// 				QString url = firstDestination["url"].toString();
+// 				QString key = firstDestination["key"].toString();
+// 				obs_data_set_string(settings, "key", key.toStdString().c_str());
+// 				obs_data_set_string(settings, "server", url.toStdString().c_str());
+//     			obs_data_release(settings);
 
 				
-					for (int i = 1; i < destinationsArray.size(); i++) {
-        				QJsonObject destination = destinationsArray[i].toObject();
-        				QString platformUserName = destination["platformUserName"].toString();
-        				QString platformTitle = destination["platformTitle"].toString();
-        				QString title = platformUserName + " / " + platformTitle;
-        				auto newid = GenerateId(global);
-        				auto target = std::make_shared<OutputTargetConfig>();
-        				target->id = newid;
-        				target->name = title.toStdString();
-       				 	target->serviceParam = {
-            				{"server", destination["url"].toString().toStdString()},
-            				{"key", destination["key"].toString().toStdString()}
-        				};
-						target->syncStart = true;
-        				global.targets.emplace_back(target);
+// 					for (int i = 1; i < destinationsArray.size(); i++) {
+//         				QJsonObject destination = destinationsArray[i].toObject();
+//         				QString platformUserName = destination["platformUserName"].toString();
+//         				QString platformTitle = destination["platformTitle"].toString();
+//         				QString title = platformUserName + " / " + platformTitle;
+//         				auto newid = GenerateId(global);
+//         				auto target = std::make_shared<OutputTargetConfig>();
+//         				target->id = newid;
+//         				target->name = title.toStdString();
+//        				 	target->serviceParam = {
+//             				{"server", destination["url"].toString().toStdString()},
+//             				{"key", destination["key"].toString().toStdString()}
+//         				};
+// 						target->syncStart = true;
+//         				global.targets.emplace_back(target);
 
-        				auto pushwidget = createPushWidget(newid, container_);
-        				itemLayout_->addWidget(pushwidget);
-        				SaveConfig();
-    				}
+//         				auto pushwidget = createPushWidget(newid, container_);
+//         				itemLayout_->addWidget(pushwidget);
+//         				SaveConfig();
+//     				}
 				
     		 
-        // Create and add a QLabel for each destination
-        // QLabel* destinationLabel = new QLabel(QString("Destination: %1").arg(target->name));
-        // titleScheduledLayout->addWidget(destinationLabel);
-    	});
-			titleScheduledLayout->addWidget(SelectButton);
+//         // Create and add a QLabel for each destination
+//         // QLabel* destinationLabel = new QLabel(QString("Destination: %1").arg(target->name));
+//         // titleScheduledLayout->addWidget(destinationLabel);
+//     	});
+// 			titleScheduledLayout->addWidget(SelectButton);
 
-			// Add the title and scheduledTime group to the item layout
-            itemLayout->addWidget(titleScheduledGroup);
-
-
-
-            // Add the custom widget to the scroll layout
-            scrollLayout->addWidget(itemWidget);
-        }
-    }
-}
+// 			// Add the title and scheduledTime group to the item layout
+//             itemLayout->addWidget(titleScheduledGroup);
 
 
-// Create a horizontal layout for Add and Cancel buttons
-QHBoxLayout* buttonLayout = new QHBoxLayout;
 
-// Create Cancel and Add buttons outside of the loop
-// QPushButton* cancelButton = new QPushButton("Cancel");
-QPushButton* addButton = new QPushButton("Schedule New Broadcast");
+//             // Add the custom widget to the scroll layout
+//             scrollLayout->addWidget(itemWidget);
+//         }
+//     }
+// }
 
-// Add the scroll area to your main layout or window
-newUiLayout->addWidget(scrollArea);
-// Add Cancel and Add buttons to the layout or wherever appropriate
-// buttonLayout->addWidget(cancelButton);
-buttonLayout->addWidget(addButton);
-QObject::connect(addButton, &QPushButton::clicked,
-				 [this]() {
-					 // URL to open in the default web browser
-        // QUrl url("https://app.streamway.in");
 
-        // Open the URL in the user's default web browser
-        QDesktopServices::openUrl(QUrl("https://app.streamway.in/"));
-				 });
-// Create a container widget for the button layout
-QWidget* buttonContainer = new QWidget;
-buttonContainer->setLayout(buttonLayout);
-newUiLayout->addWidget(buttonContainer);
-// Connect signals and slots for Cancel and Add buttons
-// QObject::connect(cancelButton, &QPushButton::clicked, window, &QWidget::close);
+// // Create a horizontal layout for Add and Cancel buttons
+// QHBoxLayout* buttonLayout = new QHBoxLayout;
+
+// // Create Cancel and Add buttons outside of the loop
+// // QPushButton* cancelButton = new QPushButton("Cancel");
+// QPushButton* addButton = new QPushButton("Schedule New Broadcast");
+
+// // Add the scroll area to your main layout or window
+// newUiLayout->addWidget(scrollArea);
+// // Add Cancel and Add buttons to the layout or wherever appropriate
+// // buttonLayout->addWidget(cancelButton);
+// buttonLayout->addWidget(addButton);
+// QObject::connect(addButton, &QPushButton::clicked,
+// 				 [this]() {
+// 					 // URL to open in the default web browser
+//         // QUrl url("https://app.streamway.in");
+
+//         // Open the URL in the user's default web browser
+//         QDesktopServices::openUrl(QUrl("https://app.streamway.in/"));
+// 				 });
+// // Create a container widget for the button layout
+// QWidget* buttonContainer = new QWidget;
+// buttonContainer->setLayout(buttonLayout);
+// newUiLayout->addWidget(buttonContainer);
+// // Connect signals and slots for Cancel and Add buttons
+// // QObject::connect(cancelButton, &QPushButton::clicked, window, &QWidget::close);
         
-    } else {
-        qDebug() << "Network error: " << networkReply->errorString();
-        // Handle network errors here
-    }
+//     } else {
+//         qDebug() << "Network error: " << networkReply->errorString();
+//         // Handle network errors here
+//     }
 
-    networkReply->deleteLater();
+//     networkReply->deleteLater();
 
-    // newUiLayout->addWidget(successLabel);
+//     // newUiLayout->addWidget(successLabel);
   
 	
-    // newUi->setCentralWidget(centralWidget);
-    // newUi->show();
-}
+//     // newUi->setCentralWidget(centralWidget);
+//     // newUi->show();
+// }
 
 
 
