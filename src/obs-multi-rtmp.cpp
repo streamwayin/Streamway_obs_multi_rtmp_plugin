@@ -389,16 +389,22 @@ QWidget* LoginWidget() {
 		QLineEdit* keyLineEdit_ = new QLineEdit(container_);
 		layout_->addWidget(keyLineEdit_);
 
+		bool isRequestInProgress = false;
 		// Add a button for verification
 		QPushButton* verifyButton_ = new QPushButton("Verify", container_);
 		layout_->addWidget(verifyButton_);
 
-		QObject::connect(verifyButton_, &QPushButton::clicked, [this,scrollLayout , scrollWidget , uidLineEdit_ , keyLineEdit_ ,verifyButton_ , codeLabel_  , uidLabel_]() {
+		QObject::connect(verifyButton_, &QPushButton::clicked, [this,scrollLayout , scrollWidget , uidLineEdit_ , keyLineEdit_ ,verifyButton_ , codeLabel_  , uidLabel_ , &isRequestInProgress]() {
 			// Get the code entered by the user
 			QString uid = uidLineEdit_->text();
 			QString key = keyLineEdit_->text();
 
-			QString combined = uid + ":" + key;
+			 if (isRequestInProgress) {
+        // Handle or ignore the subsequent click while a request is ongoing
+        return;
+    }
+
+   
 			//  if (!this->curl) {
            	// 	 // Handle curl initialization error
 			// 	qDebug() << "Network error: ";
@@ -456,10 +462,14 @@ QWidget* LoginWidget() {
   std::string response;
  
   // Send the HTTP request
-  if (!sendHttpRequest(url, authHeader, jsonData, response)) {
+  if(sendHttpRequest(url, authHeader, jsonData, response , uid , key)){
+	 isRequestInProgress = true;
+  }else{
+	isRequestInProgress = false;
+
+  }
     // cerr << "Error sending request!";
-    return 1;
-  };
+   
  
   // Parse the JSON response
 //   Json::Value root;
@@ -486,11 +496,38 @@ size_t writeCallback(void *ptr, size_t size, size_t nmemb, void *stream) {
   return size * nmemb;
 };
  
+struct MemoryStruct {
+  char *memory;
+  size_t size;
+};
+
+static size_t WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *context) {
+  size_t bytec = size * nmemb;
+  struct MemoryStruct *mem = (struct MemoryStruct *)context;
+  void *temp = realloc(mem->memory, mem->size + bytec + 1);
+   if (temp != NULL) {
+       mem->memory = (char *)temp;
+        mem->size += bytec;
+    }
+  if(mem->memory == NULL) {
+    printf("not enough memory (realloc returned NULL)\n");
+    return 0;
+  }
+  memcpy(&(mem->memory[mem->size]), ptr, bytec);
+  mem->size += bytec;
+  mem->memory[mem->size] = 0;
+  return nmemb;
+}
+
 // Function to send an HTTP request and parse JSON response
-bool sendHttpRequest( std::string &url,  std::string &authHeader,  std::string &jsonData, std::string &response) {
+bool sendHttpRequest( std::string &url,  std::string &authHeader,  std::string &jsonData, std::string &response , const QString& uid, const QString& key) {
   CURL *curl;
   CURLcode res;
- 
+   struct MemoryStruct chunk;
+  chunk.memory = (char *)malloc(1); 
+  chunk.size = 0;
+  chunk.memory[chunk.size] = 0;
+
   // Initialize curl
   curl = curl_easy_init();
   if (!curl) {
@@ -506,9 +543,23 @@ bool sendHttpRequest( std::string &url,  std::string &authHeader,  std::string &
   // Set the JSON data as the POST fields
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonData.c_str());
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, jsonData.length());
- 
+	char *val1 = curl_easy_escape(curl, "tricky & ugly", 0);
+    char *val2 = curl_easy_escape(curl, "Hello from cURL!!!", 0);
+    size_t total_length = 4 + strlen(val1) + 1 + 4 + strlen(val2) + 1;
+	char *fields = (char *)malloc(total_length);
+    sprintf(fields, "foo=%s&bar=%s", val1, val2);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fields);
+    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_BASIC);
+    curl_easy_setopt(curl, CURLOPT_USERNAME, uid.toStdString().c_str());
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, key.toStdString().c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);	
+
+  struct curl_slist *headers = NULL;
+  headers = curl_slist_append(headers, "Accept: application/json");
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
   // Set the authentication header
-  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, &authHeader);
+//   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, &authHeader);
  
   // Set the write callback to capture the response
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &MultiOutputWidget::writeCallback);
@@ -522,7 +573,9 @@ bool sendHttpRequest( std::string &url,  std::string &authHeader,  std::string &
     curl_easy_cleanup(curl);
     return false;
   }
- 
+ free(val1);
+    free(val2);
+    free(fields);
   // Cleanup curl
   curl_easy_cleanup(curl);
  
