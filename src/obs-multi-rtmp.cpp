@@ -394,80 +394,45 @@ QWidget* LoginWidget() {
 		QPushButton* verifyButton_ = new QPushButton("Verify", container_);
 		layout_->addWidget(verifyButton_);
 
+		QPushButton* Buttonss_ = new QPushButton(container_);
+
+// Convert the boolean value to a string
+QString buttonText = "Request in progress: " + QString(isRequestInProgress ? "true" : "false");
+
+// Set the button text using the boolean value
+Buttonss_->setText(buttonText);
+
+layout_->addWidget(Buttonss_);
+
 		QObject::connect(verifyButton_, &QPushButton::clicked, [this,scrollLayout , scrollWidget , uidLineEdit_ , keyLineEdit_ ,verifyButton_ , codeLabel_  , uidLabel_ , &isRequestInProgress]() {
 			// Get the code entered by the user
 			QString uid = uidLineEdit_->text();
 			QString key = keyLineEdit_->text();
 
-			 if (isRequestInProgress) {
-        // Handle or ignore the subsequent click while a request is ongoing
-        return;
-    }
+			//  if (isRequestInProgress) {
+        	// 	// Handle or ignore the subsequent click while a request is ongoing
+        	// 	return;
+    		// }
 
-   
-			//  if (!this->curl) {
-           	// 	 // Handle curl initialization error
-			// 	qDebug() << "Network error: ";
-            // 	return;
-        	// }
-			//  if(this->curl) {
-
-				// qDebug() << "curl is ready!";
-        // Set URL for the request
-        // curl_easy_setopt(this->curl, CURLOPT_URL, "http://localhost:8000/v1/obs/version");
-        // Response buffer
-        // char response[1024];
-        // size_t bufferSize = sizeof(response);
-
-        // // Write response to buffer
-      
-        // curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-        // // Perform the request
-        //  this->res = curl_easy_perform(this->curl);
-        // // Clean up libcurl
-        // curl_easy_cleanup(this->curl);
-		// if (res != CURLE_OK) {
-        //     // Handle curl error
-        //     QString errorMessage = curl_easy_strerror(res);
-        //     qDebug() << "response error";
-		// 	qDebug() << errorMessage;
-        //     return;
-        // }
-        // if(this->res == CURLE_OK) {
-        //     long response_code;
-        //     curl_easy_getinfo(this->curl, CURLINFO_RESPONSE_CODE, &response_code);
-            
-        //     if(response_code == 200) {
-        //         QLabel* uidLabels_ = new QLabel("Uidsss", this->container_);
-        //         this->layout_->addWidget(uidLabels_);
-                
-        //     } else {
-		// 		QLabel* uidLabels_ = new QLabel("Uidsss", this->container_);
-        //         this->layout_->addWidget(uidLabels_); // Show invalid token error in codeLabel_
-		// 		return;
-        //     }
-        // } else {
-        //     // Handle request failure
-		// 	QLabel* uidLabels_ = new QLabel("Uidsss", this->container_);
-        //     this->layout_->addWidget(uidLabels_);
-		// 	return;
-        // }
-
-        
-    // }
-    			// curl_global_cleanup();
-				 std::string url = "https://api.example.com/endpoint";
+  std::string url = "https://api.example.com/endpoint";
   std::string authHeader = "Authorization: Bearer YOUR_API_KEY";
-  std::string jsonData = "{\"key\": \"value\"}";
+
   std::string response;
  
-  // Send the HTTP request
-  if(sendHttpRequest(url, authHeader, jsonData, response , uid , key)){
+ 	 isRequestInProgress = true;
+  
+
+   // Use a try-catch block to catch any potential exceptions
+    try {
+       // Send the HTTP request
+  if(sendHttpRequest(url, authHeader, response , uid , key)){
 	 isRequestInProgress = true;
   }else{
 	isRequestInProgress = false;
-
   }
+    } catch (const std::exception& e) {
+        qDebug() << "Failed to load image:" ;
+    }
     // cerr << "Error sending request!";
    
  
@@ -520,67 +485,62 @@ static size_t WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *co
 }
 
 // Function to send an HTTP request and parse JSON response
-bool sendHttpRequest( std::string &url,  std::string &authHeader,  std::string &jsonData, std::string &response , const QString& uid, const QString& key) {
-  CURL *curl;
-  CURLcode res;
-   struct MemoryStruct chunk;
-  chunk.memory = (char *)malloc(1); 
-  chunk.size = 0;
-  chunk.memory[chunk.size] = 0;
+bool sendHttpRequest(std::string &url, std::string &authHeader, std::string &response, const QString& uid, const QString& key) {
+    CURL *curl;
+    CURLcode res;
+    struct MemoryStruct chunk;
+    chunk.memory = (char *)malloc(1);
+    chunk.size = 0;
+    chunk.memory[chunk.size] = 0;
 
-  // Initialize curl
-  curl = curl_easy_init();
-  if (!curl) {
-    return false;
-  };
- 
-  // Set the URL
-  curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/obs/version");
- 
-  // Set the request method to POST
-  curl_easy_setopt(curl, CURLOPT_POST, 1L);
- 
-  // Set the JSON data as the POST fields
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonData.c_str());
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, jsonData.length());
-	char *val1 = curl_easy_escape(curl, "tricky & ugly", 0);
-    char *val2 = curl_easy_escape(curl, "Hello from cURL!!!", 0);
-    size_t total_length = 4 + strlen(val1) + 1 + 4 + strlen(val2) + 1;
-	char *fields = (char *)malloc(total_length);
-    sprintf(fields, "foo=%s&bar=%s", val1, val2);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fields);
-    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_BASIC);
+    // Initialize curl
+    curl = curl_easy_init();
+    if (!curl) {
+        return false;
+    };
+
+    // Set the URL
+    curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/obs/version");
+
+    // Set the request method to GET
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+
+    // Set authentication
+    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_easy_setopt(curl, CURLOPT_USERNAME, uid.toStdString().c_str());
     curl_easy_setopt(curl, CURLOPT_PASSWORD, key.toStdString().c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);	
 
-  struct curl_slist *headers = NULL;
-  headers = curl_slist_append(headers, "Accept: application/json");
-  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-  // Set the authentication header
-//   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, &authHeader);
- 
-  // Set the write callback to capture the response
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &MultiOutputWidget::writeCallback);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
- 
-  // Perform the request
-  res = curl_easy_perform(curl);
- 
-  // Check for errors
-  if (res != CURLE_OK) {
+    // Set the write callback to capture the response
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+
+    // Set headers
+    struct curl_slist *headers = NULL;
+    headers = curl_slist_append(headers, "Accept: application/json");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+    // Perform the request
+    res = curl_easy_perform(curl);
+
+    // Check for errors
+    if (res != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return false;
+    }
+
+    // Cleanup
     curl_easy_cleanup(curl);
-    return false;
-  }
- free(val1);
-    free(val2);
-    free(fields);
-  // Cleanup curl
-  curl_easy_cleanup(curl);
- 
-  return true;
+
+    // Save response
+    response = chunk.memory;
+
+    // Free allocated memory
+    free(chunk.memory);
+    curl_slist_free_all(headers);
+
+    return true;
 }
+
  
 // int main() {
   // Replace these with your actual values
