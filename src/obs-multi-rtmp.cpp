@@ -429,19 +429,27 @@ layout_->addWidget(Buttonss_);
   if(sendHttpRequest(url, authHeader, response , uid , key)){
 	try{
 
-		handleTab(base64AuthHeader , layout_ , scrollLayout);
+						QTabWidget* tabWidget = new QTabWidget;
+
+	// Call the functions to create tabs and add them to the QTabWidget
+    // tabWidget->addTab(createTab1(token), "Broadcasts");
+    // tabWidget->addTab(createTab2(), "Go Live");
+						tabWidget->addTab(createTab3(), "About");
+						scrollLayout->addWidget(tabWidget);
+
+		// handleSuccessfulLogin(token ,  scrollLayout);
+						// Hide the verification UI
+            			 uidLineEdit_->setVisible(false);
+    					 keyLineEdit_->setVisible(false);
+    					 verifyButton_->setVisible(false);
+						 codeLabel_->setVisible(false);
+						//  scrollWidget->setVisible(true);
+						// //  StLabel_->setVisible(false);
+						 uidLabel_->setVisible(false);
 	}catch (const std::exception& e) {
         qDebug() << "Failed to load image:" ;
 	}
-						// handleSuccessfulLogin(token ,  scrollLayout);
-						// Hide the verification UI
-            			//  uidLineEdit_->setVisible(false);
-    					//  keyLineEdit_->setVisible(false);
-    					//  verifyButton_->setVisible(false);
-						//  codeLabel_->setVisible(false);
-						//  scrollWidget->setVisible(true);
-						// //  StLabel_->setVisible(false);
-						//  uidLabel_->setVisible(false);
+						
   }else{
 	qDebug() << "Failed to load image:" ;
   }
@@ -503,10 +511,6 @@ static size_t WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *co
 bool sendHttpRequest(std::string &url, std::string &authHeader, std::string &response, const QString& uid, const QString& key) {
     CURL *curl;
     CURLcode res;
-    struct MemoryStruct chunk;
-    chunk.memory = (char *)malloc(1);
-    chunk.size = 0;
-    chunk.memory[chunk.size] = 0;
 
     // Initialize curl
     curl = curl_easy_init();
@@ -525,10 +529,6 @@ bool sendHttpRequest(std::string &url, std::string &authHeader, std::string &res
     curl_easy_setopt(curl, CURLOPT_USERNAME, uid.toStdString().c_str());
     curl_easy_setopt(curl, CURLOPT_PASSWORD, key.toStdString().c_str());
 
-    // Set the write callback to capture the response
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
-
     // Set headers
     struct curl_slist *headers = NULL;
     headers = curl_slist_append(headers, "Accept: application/json");
@@ -537,21 +537,22 @@ bool sendHttpRequest(std::string &url, std::string &authHeader, std::string &res
     // Perform the request
     res = curl_easy_perform(curl);
 
+	long response_code;
+	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
     // Check for errors
-    if (res != CURLE_OK) {
+    if (response_code != 200) {
+        curl_easy_cleanup(curl);
+        return false;
+    }
+
+	if (res != CURLE_OK) {
         curl_easy_cleanup(curl);
         return false;
     }
 
     // Cleanup
     curl_easy_cleanup(curl);
-
-    // Save response
-    response = chunk.memory;
-
-    // Free allocated memory
-    free(chunk.memory);
-    curl_slist_free_all(headers);
+	curl = NULL;
 
     return true;
 }
