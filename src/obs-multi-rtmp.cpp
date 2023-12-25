@@ -117,7 +117,7 @@ public:
         //     QString key = keyLineEdit_->text();
 		// 	QString combined = uid + ":" + key;
 		// 	// Construct the request
-		// 	QNetworkRequest request(QUrl("http://localhost:8000/v1/destinations"));
+		// 	QNetworkRequest request(QUrl("https://testapi.streamway.in/v1/destinations"));
 		// 	request.setHeader(QNetworkRequest::ContentTypeHeader,
 		// 			  "application/json");
 
@@ -490,7 +490,7 @@ bool sendHttpRequest(std::string &url, std::string &authHeader, std::string &res
     };
 
     // Set the URL
-    curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/obs/version");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://testapi.streamway.in/v1/obs/version");
 
     // Set the request method to GET
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
@@ -670,7 +670,7 @@ void handleSuccessfulLogin(const QString& uid, const QString& key, QVBoxLayout *
     // Initialize curl
     curl = curl_easy_init();
     // Set the URL
-    curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/broadcasts/upcoming");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://testapi.streamway.in/v1/broadcasts/upcoming");
 
     // Set the request method to GET
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
