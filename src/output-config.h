@@ -27,6 +27,12 @@ struct AudioEncoderConfig {
 };
 using AudioEncoderConfigPtr = std::shared_ptr<AudioEncoderConfig>; 
 
+struct AuthConfig {
+    std::string uid;
+    std::string key;
+};
+
+using AuthConfigPtr = std::shared_ptr<AuthConfig>;
 
 struct OutputTargetConfig {
     std::string id;
@@ -35,7 +41,7 @@ struct OutputTargetConfig {
 
     nlohmann::json serviceParam;
     nlohmann::json outputParam;
-
+   
     std::optional<std::string> videoConfig;
     std::optional<std::string> audioConfig;
 };
@@ -47,6 +53,7 @@ public:
     std::list<OutputTargetConfigPtr> targets;
     std::list<VideoEncoderConfigPtr> videoConfig;
     std::list<AudioEncoderConfigPtr> audioConfig;
+    std::list<AuthConfigPtr> authConfig;
 };
 
 template<class T, class S>

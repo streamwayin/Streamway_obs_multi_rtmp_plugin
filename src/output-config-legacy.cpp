@@ -69,6 +69,21 @@ static AudioEncoderConfigPtr ImportLegacyAudioConfig(QJsonObject& json) {
     return config;
 }
 
+static AuthConfigPtr ImportLegacyAuthConfig(QJsonObject& json) {
+    auto it = json.find("uid"); // Assuming the key for uid in JSON is "uid"
+    if (it == json.end()) {
+        return nullptr; // Return nullptr or empty shared_ptr if uid is not found
+    }
+
+    auto config = std::make_shared<AuthConfig>();
+    config->uid = it->toString().toStdString(); // Convert QJsonValue to std::string
+
+    it = json.find("key"); // Assuming the key for key in JSON is "key"
+    if (it != json.end())
+        config->key = it->toString().toStdString(); // Convert QJsonValue to std::string
+    
+    return config;
+}
 
 static OutputTargetConfigPtr ImportLegacyTargetConfig(QJsonObject json, MultiOutputConfig& parentConfig) {
     auto config = std::make_shared<OutputTargetConfig>();
@@ -108,6 +123,7 @@ static OutputTargetConfigPtr ImportLegacyTargetConfig(QJsonObject json, MultiOut
         audioConfig->encoderId = GenerateId(parentConfig);
         parentConfig.audioConfig.emplace_back(audioConfig);
     }
+  
 
     auto videoConfig = ImportLegacyVideoConfig(json);
     if (videoConfig) {

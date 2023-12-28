@@ -42,9 +42,19 @@
 #include "util/config-file.h"
 #include "obs.h"
 #include "curl/curl.h"
+#include <QIntValidator>
 #include <string>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <QFile>
+#include <random>
+#include <filesystem>
+#include <fstream> 
+
+#include <unordered_set>
+#include <algorithm>
+#include <util/platform.h>
+#include "json-util.hpp"
 
 #include "thread"
 #include "future"

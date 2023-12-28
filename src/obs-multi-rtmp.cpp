@@ -39,6 +39,7 @@ class MultiOutputWidget : public QDockWidget {
 	int dockLocation_;
 	bool dockVisible_;
 	bool reopenShown_;
+	std::string currentBroadcast;
 
 	// QLabel *StLabel_;
 	// QLabel *sloganLabel_;
@@ -75,115 +76,46 @@ public:
 		layout_ = new QVBoxLayout(container_);
 		layout_->setAlignment(Qt::AlignmentFlag::AlignTop);
 
-		layout_->addWidget(LoginWidget());
-		// StLabel_ = new QLabel("Streamway", container_);
-		// layout_->addWidget(StLabel_);
 
-		// sloganLabel_ = new QLabel("Get More views By multistreaming Directly from OBS", container_);
-		// layout_->addWidget(sloganLabel_);
+		 QString uid, key;
 
-		// This part is a after login
-				// Create a scroll area and set up a widget to contain the items
-		// QScrollArea* scrollArea = new QScrollArea;
-		// QWidget* scrollWidget = new QWidget;
-		// // scrollArea->setWidgetResizable(true);
-		// scrollWidget->setFixedSize(330, 500);
-		// // Create a layout for the widget inside the scroll area
-		// QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
-		// layout_->addWidget(scrollWidget);
-		// scrollWidget->setVisible(false);
+    auto profiledir = obs_frontend_get_current_profile_path();
+    if (profiledir) {
+        QString filename = QString::fromStdString(std::string(profiledir) + "/obs-multi-rtmp_auth.json");
 
-		// // Add a label and text box for entering the uid
-		// codeLabel_ = new QLabel("Uid", container_);
-		// layout_->addWidget(codeLabel_);
+        QFile file(filename);
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QByteArray jsonData = file.readAll();
+            QJsonDocument jsonDoc(QJsonDocument::fromJson(jsonData));
 
-		// uidLineEdit_ = new QLineEdit(container_);
-		// layout_->addWidget(uidLineEdit_);
+            if (!jsonDoc.isNull() && jsonDoc.isObject()) {
+                QJsonObject jsonObject = jsonDoc.object();
 
-        // // Add a label and text box for entering the code
-		// codeLabel_ = new QLabel("API Key", container_);
-		// layout_->addWidget(codeLabel_);
+                if (jsonObject.contains("uid_key") && jsonObject["uid_key"].isObject()) {
+                    QJsonObject uidKeyObj = jsonObject["uid_key"].toObject();
+                    if (uidKeyObj.contains("uid") && uidKeyObj.contains("key")) {
+                        uid = uidKeyObj["uid"].toString();
+                        key = uidKeyObj["key"].toString();
+                    }
+                }
+            }
+            file.close();
+        }
+        bfree(profiledir);
+    }
 
-		// keyLineEdit_ = new QLineEdit(container_);
-		// layout_->addWidget(keyLineEdit_);
+if (!uid.isEmpty() && !key.isEmpty()) {
+	 container_->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    container_->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    container_->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    handleTab(layout_ , layout_, uid , key);
+} else {
+   handleAuthTab(layout_);
+}
+	
 
-		// // Add a button for verification
-		// verifyButton_ = new QPushButton("Verify", container_);
-		// layout_->addWidget(verifyButton_);
-
-		// QObject::connect(verifyButton_, &QPushButton::clicked, [this, scrollLayout , scrollWidget]() {
-		// 	// Get the code entered by the user
-		// 	QString uid = uidLineEdit_->text();
-        //     QString key = keyLineEdit_->text();
-		// 	QString combined = uid + ":" + key;
-		// 	// Construct the request
-		// 	QNetworkRequest request(QUrl("https://testapi.streamway.in/v1/destinations"));
-		// 	request.setHeader(QNetworkRequest::ContentTypeHeader,
-		// 			  "application/json");
-
-		// 	// Create a QNetworkAccessManager for making the HTTP request
-		// 	networkManager_ = new QNetworkAccessManager(this);
-
-		// 	QByteArray combinedData = combined.toUtf8().toBase64();
-		// 	QString base64AuthHeader = "Basic " + QString(combinedData);
-		// 	request.setRawHeader("Authorization", base64AuthHeader.toUtf8());
-		// 	// Send the POST request
-		// 	networkReply = networkManager_->get(request);
-
-		// 	// Connect to the finished signal to handle the response
-		// 	QObject::connect(networkReply, &QNetworkReply::finished, [this, scrollLayout ,scrollWidget]() {
-		// 		if (networkReply->error() ==
-		// 		    QNetworkReply::NoError) {
-		// 			// Successful response received
-
-		// 			// Read the response data
-		// 			QByteArray responseData =
-		// 				networkReply->readAll();
-
-		// 			// TODO: Parse the response data to extract the token
-		// 			// Assuming the response contains a JSON object with a "token" field
-		// 			jsonDoc = QJsonDocument::fromJson(
-		// 				responseData);
-		// 			jsonObj = jsonDoc.object();
-
-		// 			if (jsonObj.contains("token")) {
-		// 				QString token =
-		// 					jsonObj["token"]
-		// 						.toString();
-
-		// 				// You have a valid token
-		// 				// You can use 'token' as needed
-		// 				qDebug() << "Token: " << token;
-		// 				handleTab(token , layout_ , scrollLayout);
-		// 				// handleSuccessfulLogin(token ,  scrollLayout);
-		// 				// Hide the verification UI
-        //     			 uidLineEdit_->setVisible(false);
-    	// 				 keyLineEdit_->setVisible(false);
-    	// 				 verifyButton_->setVisible(false);
-		// 				 codeLabel_->setVisible(false);
-		// 				 scrollWidget->setVisible(true);
-		// 			} else {
-		// 				// No token found in the response, indicating an invalid code
-		// 				qDebug() << "Invalid token";
-		// 				QLabel *codeLabela_ = new QLabel(
-		// 					"Invalid token:",
-		// 					container_);
-		// 				layout_->addWidget(codeLabela_);
-		// 			}
-		// 		} else {
-		// 			// Handle the network error here
-		// 			qDebug() << "Network error: "
-		// 				 << networkReply->errorString();
-		// 			QLabel *codeLabelc_ = new QLabel(
-		// 				networkReply->errorString(),
-		// 				container_);
-		// 			layout_->addWidget(codeLabelc_);
-		// 		}
-
-		// 		// Clean up the network resources
-		// 		networkReply->deleteLater();
-			// });
-		// });
+		
+		
 
 
 
@@ -356,55 +288,330 @@ public:
 	}
 
 // Function to create Tab 1 and its content
-QWidget* LoginWidget() {
-    QWidget* loginWidget = new QWidget;
-    QVBoxLayout* LoginLayout = new QVBoxLayout(loginWidget);
+QWidget* LoginWithPhoneWidget() {
+    QWidget* loginWithPhoneWidget = new QWidget;
+QVBoxLayout* LoginLayout = new QVBoxLayout(loginWithPhoneWidget);
 
-	// QLabel* StLabel_ = new QLabel("Streamway", loginWidget);
-	// LoginLayout->addWidget(StLabel_);
+QLabel* sloganLabel_ = new QLabel("Get More Views By Multistreaming Directly From OBS", loginWithPhoneWidget);
+sloganLabel_->setStyleSheet("QLabel{font-size: 14px;font-family: Arial;}");
+LoginLayout->addWidget(sloganLabel_);
+sloganLabel_->setWordWrap(true);
 
-	QLabel* sloganLabel_ = new QLabel("Get More Views By Multistreaming Directly From OBS", loginWidget);
+QWidget* scrollWidget = new QWidget;
+		// scrollArea->setWidgetResizable(true);
+		
+		// Create a layout for the widget inside the scroll area
+		QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
+		LoginLayout->addWidget(scrollWidget);
+		scrollWidget->setVisible(false);
+
+// Mobile Number text box
+QLabel* phone_ = new QLabel("Enter Phone Number", container_);
+LoginLayout->addWidget(phone_);
+
+auto horizontalPhoneLayout = new QHBoxLayout;
+QLineEdit* prePhoneLineEdit_ = new QLineEdit(container_);
+prePhoneLineEdit_->setText("+91");
+prePhoneLineEdit_->setMaximumWidth(40);
+horizontalPhoneLayout->addWidget(prePhoneLineEdit_);
+
+QLineEdit* phoneLineEdit_ = new QLineEdit(container_);
+phoneLineEdit_->setValidator(new QIntValidator(0, 1000000000, this));
+horizontalPhoneLayout->addWidget(phoneLineEdit_);
+
+LoginLayout->addLayout(horizontalPhoneLayout);
+
+// Add a button for getting OTP
+QPushButton* getOTPButton_ = new QPushButton("Get OTP", container_);
+LoginLayout->addWidget(getOTPButton_);
+
+// OTP input and Verify button
+QLineEdit* otpLineEdit_ = new QLineEdit(container_);
+otpLineEdit_->setValidator(new QIntValidator(0, 1000, this));
+otpLineEdit_->setPlaceholderText("Enter OTP here");
+
+QPushButton* verifyOTPButton_ = new QPushButton("Verify", container_);
+
+LoginLayout->addWidget(otpLineEdit_);
+LoginLayout->addWidget(verifyOTPButton_);
+verifyOTPButton_->setVisible(false);
+otpLineEdit_->setReadOnly(true);
+
+QLabel* errorL = new QLabel();
+LoginLayout->addWidget(errorL);
+errorL->setWordWrap(true);
+errorL->setStyleSheet("QLabel{font-size: 15px;font-family: Arial;color:red;}");
+errorL->setVisible(false);
+
+
+
+		QObject::connect(getOTPButton_ , &QPushButton::clicked, [this, scrollLayout , scrollWidget  ,phone_ , phoneLineEdit_ , getOTPButton_ , prePhoneLineEdit_ , otpLineEdit_ , verifyOTPButton_  ,errorL](){
+			QString fullPhoneNumber_ = prePhoneLineEdit_->text() + phoneLineEdit_->text();
+			
+			phoneLineEdit_->setReadOnly(true);
+			prePhoneLineEdit_->setReadOnly(true);
+			getOTPButton_->setEnabled(false);
+			
+			
+			Json jsonObject;
+			jsonObject["phoneNumber"] = fullPhoneNumber_.toStdString();
+			   // Convert JSON object to string
+    			std::string jsonData = jsonObject.dump(2);
+
+			CURL *curl;
+    		CURLcode res;
+			curl = curl_easy_init();
+
+			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
+			curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/otp/obs/phone/send");
+			// curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+			// curl_easy_setopt(curl , CURLOPT_WRITEFUNCTION , writeCallback);
+
+			struct curl_slist *headers = NULL;
+			headers = curl_slist_append(headers, "Accept: */*");
+			headers = curl_slist_append(headers, "Content-Type: application/json");
+			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonData.c_str());
+
+			CURLcode ret = curl_easy_perform(curl);
+
+			long response_code;
+				curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+
+	    		if (response_code != 200) {
+        			curl_easy_cleanup(curl);
+					
+        			errorL->setText("This Phone Number is not Registerd on Streamway");
+    			}else{
+					verifyOTPButton_->setVisible(true);
+					errorL->setVisible(false);
+					getOTPButton_->setVisible(false);
+					verifyOTPButton_->setVisible(true);
+					otpLineEdit_->setVisible(true);
+					otpLineEdit_->setReadOnly(false);
+				}
+
+	  curl_easy_cleanup(curl);
+		curl = NULL;
+			
+		});
+
+		QObject::connect(verifyOTPButton_ , &QPushButton::clicked, [this,scrollLayout , scrollWidget  ,phone_ , phoneLineEdit_ , getOTPButton_ , prePhoneLineEdit_ , otpLineEdit_ , verifyOTPButton_ , errorL ](){
+			phone_->setText("Enter OTP");
+			phoneLineEdit_->setReadOnly(true);
+			prePhoneLineEdit_->setReadOnly(true);
+			getOTPButton_->setEnabled(false);
+			verifyOTPButton_->setEnabled(false);
+			QString fullPhoneNumber_ = prePhoneLineEdit_->text() + phoneLineEdit_->text();
+			QString otp = otpLineEdit_->text();
+			bool ok;
+			int otpAsNumber = otp.toInt(&ok);
+			Json jsonObject;
+			jsonObject["phoneNumber"] = fullPhoneNumber_.toStdString();
+			jsonObject["otp"] = otpAsNumber;
+			   // Convert JSON object to string
+    			std::string jsonData = jsonObject.dump(2);
+
+			CURL *curl;
+    		CURLcode res;
+			std::string readBuffer;
+			curl = curl_easy_init();
+
+			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
+			curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/otp/obs/verify");
+			// curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+			// curl_easy_setopt(curl , CURLOPT_WRITEFUNCTION , writeCallback);
+
+			struct curl_slist *headers = NULL;
+			headers = curl_slist_append(headers, "Accept: */*");
+			headers = curl_slist_append(headers, "Content-Type: application/json");
+			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonData.c_str());
+			curl_easy_setopt(curl , CURLOPT_WRITEFUNCTION , writeCallback);
+			curl_easy_setopt(curl , CURLOPT_WRITEDATA , &readBuffer);
+
+			CURLcode ret = curl_easy_perform(curl);
+
+			long response_code;
+				curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+
+	    			if (response_code != 200) {
+        			curl_easy_cleanup(curl);
+        			phone_->setVisible(false);
+					phone_->setVisible(false);
+					phoneLineEdit_->setVisible(false);
+					getOTPButton_->setVisible(false);
+					prePhoneLineEdit_->setVisible(false);
+					verifyOTPButton_->setVisible(false);
+					otpLineEdit_->setVisible(false);
+
+    			}else if(response_code == 400 || response_code == 404){
+					auto j3 = Json::parse(readBuffer);
+					Json object = j3;
+					std::string error = j3["msg"];
+					errorL->setVisible(true);
+					errorL->setText(QString::fromStdString(error));
+				}else{
+					
+					errorL->setText("Internal Error Please Contact Us");
+				}
+
+	  		curl_easy_cleanup(curl);
+			curl = NULL;
+
+			
+
+		});
+
+		
+
+    return loginWithPhoneWidget;
+};
+
+
+QWidget* LoginWithEmailWidget() {
+	 QWidget* loginWithEmailWidget = new QWidget;
+    QVBoxLayout* LoginLayout = new QVBoxLayout(loginWithEmailWidget);
+
+	QLabel* sloganLabel_ = new QLabel("Get More Views By Multistreaming Directly From OBS", loginWithEmailWidget);
 	sloganLabel_->setStyleSheet("QLabel{font-size: 14px;font-family: Arial;}");
-	layout_->addWidget(sloganLabel_);
+	LoginLayout->addWidget(sloganLabel_);
 	sloganLabel_->setWordWrap(true);
 	QWidget* scrollWidget = new QWidget;
 		// scrollArea->setWidgetResizable(true);
 		
 		// Create a layout for the widget inside the scroll area
 		QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
-		layout_->addWidget(scrollWidget);
+		LoginLayout->addWidget(scrollWidget);
+		scrollWidget->setVisible(false);
+
+		// Add a label and text box for entering the uid
+		QLabel* emailLabel_ = new QLabel("Email", container_);
+		LoginLayout->addWidget(emailLabel_);
+
+		QLineEdit* emailLineEdit_ = new QLineEdit(container_);
+		LoginLayout->addWidget(emailLineEdit_);
+
+        // Add a label and text box for entering the code
+		QLabel* codeLabel_ = new QLabel("API Key", container_);
+		LoginLayout->addWidget(codeLabel_);
+
+		QLineEdit* keyLineEdit_ = new QLineEdit(container_);
+		LoginLayout->addWidget(keyLineEdit_);
+
+	
+		// Add a button for verification
+		QPushButton* verifyButton_ = new QPushButton("Verify", container_);
+		LoginLayout->addWidget(verifyButton_);
+
+		QLabel* errorL = new QLabel("Invalid Uid or Api Key");
+		errorL->setStyleSheet("QLabel{font-size: 14px;font-family: Arial;}");
+		scrollLayout->addWidget(errorL);
+		errorL->setWordWrap(true);
+		errorL->setStyleSheet("QLabel{font-size: 15px;font-family: Arial;color:red;}"); 
+		errorL->setVisible(false);
+
+		
+
+		QObject::connect(verifyButton_, &QPushButton::clicked, [this,errorL,scrollLayout , scrollWidget , emailLineEdit_ , keyLineEdit_ ,verifyButton_ , codeLabel_  , emailLabel_ ]() {
+			// Get the code entered by the user
+			QString uid = emailLineEdit_->text();
+			QString key = keyLineEdit_->text();
+
+			QString combined = uid + ":" + key;
+		
+
+			QByteArray combinedData = combined.toUtf8().toBase64();
+			QString base64AuthHeader = "Basic " + QString(combinedData);
+
+  std::string url = "https://api.example.com/endpoint";
+  std::string authHeader = "Authorization: Bearer YOUR_API_KEY";
+
+  std::string response;
+ 
+ 
+  
+
+   // Use a try-catch block to catch any potential exceptions
+    try {
+       // Send the HTTP request
+  if(sendHttpRequest(url, authHeader, response , uid , key)){
+	try{
+
+				// // Hide the verification UI
+            			 emailLineEdit_->setVisible(false);
+    					 keyLineEdit_->setVisible(false);
+    					 verifyButton_->setVisible(false);
+						 codeLabel_->setVisible(false);
+						 scrollWidget->setVisible(true);
+						 emailLabel_->setVisible(false);
+						 	errorL->setVisible(false);
+					handleTab( layout_ , scrollLayout, uid , key);
+						
+	}catch (const std::exception& e) {
+		scrollWidget->setVisible(true);
+       	errorL->setVisible(true);
+		
+	}
+						
+  }else{
+	scrollWidget->setVisible(true);
+	errorL->setVisible(true);
+  }
+    } catch (const std::exception& e) {
+		scrollWidget->setVisible(true);
+        errorL->setVisible(true);
+    }			
+		});
+
+    return loginWithEmailWidget;
+}
+
+
+QWidget* LoginWithAPIKeyWidget(QTabWidget *tabWidget) {
+	 QWidget* loginWithAPIKeyWidget = new QWidget;
+    QVBoxLayout* LoginLayout = new QVBoxLayout(loginWithAPIKeyWidget);
+
+	QLabel* sloganLabel_ = new QLabel("Get More Views By Multistreaming Directly From OBS", loginWithAPIKeyWidget);
+	sloganLabel_->setStyleSheet("QLabel{font-size: 14px;font-family: Arial;}");
+	LoginLayout->addWidget(sloganLabel_);
+	sloganLabel_->setWordWrap(true);
+	QWidget* scrollWidget = new QWidget;
+		// scrollArea->setWidgetResizable(true);
+		
+		// Create a layout for the widget inside the scroll area
+		QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
+		LoginLayout->addWidget(scrollWidget);
 		scrollWidget->setVisible(false);
 
 		// Add a label and text box for entering the uid
 		QLabel* uidLabel_ = new QLabel("Uid", container_);
-		layout_->addWidget(uidLabel_);
+		LoginLayout->addWidget(uidLabel_);
 
 		QLineEdit* uidLineEdit_ = new QLineEdit(container_);
-		layout_->addWidget(uidLineEdit_);
+		LoginLayout->addWidget(uidLineEdit_);
 
         // Add a label and text box for entering the code
 		QLabel* codeLabel_ = new QLabel("API Key", container_);
-		layout_->addWidget(codeLabel_);
+		LoginLayout->addWidget(codeLabel_);
 
 		QLineEdit* keyLineEdit_ = new QLineEdit(container_);
-		layout_->addWidget(keyLineEdit_);
+		LoginLayout->addWidget(keyLineEdit_);
 
-		bool isRequestInProgress = false;
+	
 		// Add a button for verification
 		QPushButton* verifyButton_ = new QPushButton("Verify", container_);
-		layout_->addWidget(verifyButton_);
+		LoginLayout->addWidget(verifyButton_);
 
-		QPushButton* Buttonss_ = new QPushButton(container_);
+		QLabel* errorL = new QLabel("Invalid Uid or Api Key");
+		errorL->setStyleSheet("QLabel{font-size: 14px;font-family: Arial;}");
+		scrollLayout->addWidget(errorL);
+		errorL->setWordWrap(true);
+		errorL->setStyleSheet("QLabel{font-size: 15px;font-family: Arial;color:red;}"); 
+		errorL->setVisible(false);
 
-// Convert the boolean value to a string
-QString buttonText = "Request in progress: " + QString(isRequestInProgress ? "true" : "false");
 
-// Set the button text using the boolean value
-Buttonss_->setText(buttonText);
-
-layout_->addWidget(Buttonss_);
-
-		QObject::connect(verifyButton_, &QPushButton::clicked, [this,scrollLayout , scrollWidget , uidLineEdit_ , keyLineEdit_ ,verifyButton_ , codeLabel_  , uidLabel_ , &isRequestInProgress]() {
+		QObject::connect(verifyButton_, &QPushButton::clicked, [this,errorL,scrollLayout , scrollWidget , uidLineEdit_ , keyLineEdit_ ,verifyButton_ , codeLabel_  , uidLabel_ ,tabWidget]() {
 			// Get the code entered by the user
 			QString uid = uidLineEdit_->text();
 			QString key = keyLineEdit_->text();
@@ -420,14 +627,41 @@ layout_->addWidget(Buttonss_);
 
   std::string response;
  
- 	 isRequestInProgress = true;
-  
 
    // Use a try-catch block to catch any potential exceptions
     try {
        // Send the HTTP request
   if(sendHttpRequest(url, authHeader, response , uid , key)){
 	try{
+
+	 auto profiledir = obs_frontend_get_current_profile_path();
+        if (profiledir) {
+            std::string filename = profiledir;
+            filename += "/obs-multi-rtmp_auth.json";
+
+            // Read existing JSON content from the file
+            std::ifstream inFile(filename);
+            nlohmann::json configJson;
+
+            if (inFile.is_open()) {
+                inFile >> configJson;
+                inFile.close();
+            } 
+
+            // Update uid and key in the existing JSON object
+            configJson["uid_key"]["uid"] = uid.toStdString();
+            configJson["uid_key"]["key"] =  key.toStdString();
+			 
+
+            // Convert the updated JSON to a string
+            std::string content = configJson.dump();
+
+			
+
+            // Write the updated content back to the file
+            os_quick_write_utf8_file_safe(filename.c_str(), content.c_str(), content.size(), true, "tmp", "bak");
+        }
+        bfree(profiledir);
 
 				// // Hide the verification UI
             			 uidLineEdit_->setVisible(false);
@@ -436,21 +670,51 @@ layout_->addWidget(Buttonss_);
 						 codeLabel_->setVisible(false);
 						 scrollWidget->setVisible(true);
 						 uidLabel_->setVisible(false);
+						 	errorL->setVisible(false);
+
+
+							
 					handleTab( layout_ , scrollLayout, uid , key);
-						
+						// while (tabWidget->count() > 0) {
+            			// 	QWidget* tabToRemove = tabWidget->widget(0); // Get the first 		tab
+            			// 	tabWidget->removeTab(0); // Remove the first tab
+            			// 	delete tabToRemove; // Optionally delete the removed tab widget
+       					//  }
 	}catch (const std::exception& e) {
-        qDebug() << "Failed to load image:" ;
+		scrollWidget->setVisible(true);
+       	errorL->setVisible(true);
+		
 	}
 						
   }else{
-	qDebug() << "Failed to load image:" ;
+	scrollWidget->setVisible(true);
+	errorL->setVisible(true);
   }
     } catch (const std::exception& e) {
-        qDebug() << "Failed to load image:" ;
+		scrollWidget->setVisible(true);
+        errorL->setVisible(true);
     }			
 		});
 
-    return loginWidget;
+    return loginWithAPIKeyWidget;
+}
+
+// Function to handle Authentation Tabs
+void handleAuthTab( QVBoxLayout *layout) {
+	// Create a QTabWidget to hold the tabs
+	QTabWidget* tabWidget = new QTabWidget;
+
+	// Call the functions to create tabs and add them to the QTabWidget
+  // Create widgets for each tab content
+    QWidget* phoneWidget = LoginWithPhoneWidget();
+    QWidget* emailWidget = LoginWithEmailWidget();
+    QWidget* apiKeyWidget = LoginWithAPIKeyWidget(tabWidget);
+
+    // Add tabs to the QTabWidget
+    // tabWidget->addTab(phoneWidget, "Phone");
+    // tabWidget->addTab(emailWidget, "Email");
+    tabWidget->addTab(apiKeyWidget, "API Key");
+	layout->addWidget(tabWidget);
 };
 
 // Define the callback function to capture response data
@@ -528,16 +792,12 @@ bool sendHttpRequest(std::string &url, std::string &authHeader, std::string &res
     return true;
 }
 
- 
-
- 
-
 // Function to create Tab 1 and its content
-QWidget* createTab1(const QString& uid, const QString& key) {
+QWidget* createTab1(const QString& uid, const QString& key , QTabWidget *tabWidget) {
     QWidget* tab1 = new QWidget;
     QVBoxLayout* tab1Layout = new QVBoxLayout(tab1);
 	tab1->setFixedSize(320, 550);
-	handleSuccessfulLogin(uid , key , tab1Layout);
+	handleSuccessfulLogin(uid , key , tab1Layout , tabWidget);
     return tab1;
 };
 
@@ -594,6 +854,47 @@ QWidget* createTab2() {
 		allBtnLayout->addWidget(stopAllButton);
 		allBtnContainer->setLayout(allBtnLayout);
 		tab2Layout->addWidget(allBtnContainer);
+		auto endAllBroadcastButton = new QPushButton("End Broadcast");
+		tab2Layout->addWidget(endAllBroadcastButton);
+
+		QObject::connect(endAllBroadcastButton, &QPushButton::clicked, [this]() {
+			
+			CURL *curl;
+    		CURLcode res;
+			curl = curl_easy_init();
+
+			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
+			std::string url = "http://localhost:8000/v1/broadcasts/" + currentBroadcast;
+			curl_easy_setopt(curl, CURLOPT_URL,url.c_str());
+			// curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+			// curl_easy_setopt(curl , CURLOPT_WRITEFUNCTION , writeCallback);
+
+			struct curl_slist *headers = NULL;
+			headers = curl_slist_append(headers, "Accept: */*");
+			headers = curl_slist_append(headers, "Content-Type: application/json");
+			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+			
+
+			CURLcode ret = curl_easy_perform(curl);
+			long response_code;
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+    		// Check for errors
+    		if (response_code != 200) {
+    		    curl_easy_cleanup(curl);
+    		    return false;
+    		}
+
+			// if (res != CURLE_OK) {
+    		//     curl_easy_cleanup(curl);
+    		//     return false;
+    		// }
+
+    		// Cleanup
+    		curl_easy_cleanup(curl);
+			curl = NULL;
+
+		})
+
 
 		QObject::connect(startAllButton, &QPushButton::clicked,
 				 [this]() {
@@ -616,10 +917,63 @@ QWidget* createTab2() {
 };
 
 
+
+// Function to recreate the UI layout
+void recreateUILayout(QVBoxLayout* newUiLayout) {
+    // Clear the existing layout
+    QLayoutItem* item;
+    while ((item = newUiLayout->takeAt(0)) != nullptr) {
+        delete item->widget(); // Remove and delete widgets in the layout
+        delete item; // Delete layout items
+    }
+
+    // Recreate the layout
+    handleAuthTab(newUiLayout);// Call your handleTab function or create a new layout here
+}
+
 // Function to create Tab 1 and its content
-QWidget* createTab3() {
+QWidget* createTab3(QVBoxLayout* newUiLayout) {
 QWidget* tab3 = new QWidget;
+
 QVBoxLayout* tab3Layout = new QVBoxLayout(tab3);
+
+		auto logOutButton = new QPushButton("LogOut" , tab3);
+		tab3Layout->addWidget(logOutButton);
+		QObject::connect(logOutButton, &QPushButton::clicked,
+				 [this , newUiLayout]() {
+					auto profiledir = obs_frontend_get_current_profile_path();
+        if (profiledir) {
+            std::string filename = profiledir;
+            filename += "/obs-multi-rtmp_auth.json";
+
+            // Read existing JSON content from the file
+            std::ifstream inFile(filename);
+            nlohmann::json configJson;
+
+            if (inFile.is_open()) {
+                inFile >> configJson;
+                inFile.close();
+            } 
+
+            // Update uid and key in the existing JSON object
+            configJson["uid_key"]["uid"] ="";
+            configJson["uid_key"]["key"] =  "";
+			 
+
+            // Convert the updated JSON to a string
+            std::string content = configJson.dump();
+
+			
+
+            // Write the updated content back to the file
+            os_quick_write_utf8_file_safe(filename.c_str(), content.c_str(), content.size(), true, "tmp", "bak");
+        }
+        bfree(profiledir);
+
+		recreateUILayout(newUiLayout);
+
+ });
+
 QString quote = "Credit -> obs-multi-rtmp plugin by sorayuki\n"
 				"This plugin is an extention of obs-multi-rtmp and it intents to empower users to multistream from within OBS itself. "
 				"Purpose of plugin is to let user schedule event from within the OBS studio itself rathar than opening multiple tabs of diffrent social platforms like youtube and facebook and manually copy pasting the keys etc. "
@@ -634,8 +988,8 @@ auto linkLable = new QLabel(
 			linkLable->setOpenExternalLinks(true);				
 
 QLabel* quoteLabel = new QLabel(quote);
-quoteLabel->setWordWrap(true);
 tab3Layout->addWidget(quoteLabel);
+quoteLabel->setWordWrap(true);
 tab3Layout->addWidget(linkLable);
 // Add the quote label to the layout or widget where you want to display it
 tab3Layout->addWidget(quoteLabel);
@@ -645,11 +999,29 @@ tab3Layout->addWidget(quoteLabel);
 void handleTab( QVBoxLayout *layout , QVBoxLayout *newUiLayout ,const QString& uid, const QString& key) {
 	// Create a QTabWidget to hold the tabs
 	QTabWidget* tabWidget = new QTabWidget;
+	QWidget* tab1 = createTab1(uid, key , tabWidget);
+    QWidget* tab2 = createTab2();
+    QWidget* tab3 = createTab3(newUiLayout);
 
-	// Call the functions to create tabs and add them to the QTabWidget
-    tabWidget->addTab(createTab1(uid , key), "Broadcasts");
-    tabWidget->addTab(createTab2(), "Go Live");
-	tabWidget->addTab(createTab3(), "About");
+    // Set size policies to prevent unnecessary space
+    tab1->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    tab2->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    tab3->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
+	 // Set fixed sizes for tabs
+    // tab1->setFixedSize(200, 50); // Set width and height for tab1
+    tab2->setMinimumSize(300, 200); // Set minimum width and height for tab2
+    tab3->setMaximumSize(240, 230); // Set maximum width and height for tab3
+
+	 // Set background color for each tab
+    // tab1->setStyleSheet("background-color: lightblue;"); // Change color as needed
+    // tab2->setStyleSheet("background-color: lightgreen;"); // Change color as needed
+    // tab3->setStyleSheet("background-color: lightyellow;"); // Change color as needed
+
+    // Add tabs to the QTabWidget
+    tabWidget->addTab(tab1, "Broadcasts");
+    tabWidget->addTab(tab2, "Go Live");
+    tabWidget->addTab(tab3, "About");
 	newUiLayout->addWidget(tabWidget);
 };
 
@@ -661,7 +1033,7 @@ static size_t writeCallback(void *ptr, size_t size, size_t nmemb, void *stream) 
 };
  
 
-void handleSuccessfulLogin(const QString& uid, const QString& key, QVBoxLayout *newUiLayout) {
+void handleSuccessfulLogin(const QString& uid, const QString& key, QVBoxLayout *newUiLayout , QTabWidget *tabWidget) {
 
 
 	CURL *curl;
@@ -763,18 +1135,12 @@ for (const auto& jsonObject : j3) {
 
 			// Set a fixed size for the QGroupBox
 			titleScheduledGroup->setMinimumSize(220, 110); // Set the minimum width and height
-			// Set padding or margins for the contents of the QGroupBox
-			int leftMargin = 10; // Adjust as needed
-			int topMargin = 0;  // Adjust as needed
-			int rightMargin = 10; // Adjust as needed
-			int bottomMargin = 10;  // Adjust as needed
-			titleScheduledLayout->setContentsMargins(leftMargin, topMargin, rightMargin, bottomMargin);
 
             // Show title from jsonObject
              QString title = QString::fromStdString(jsonObject["title"].get<std::string>());
             QLabel* titleLabel = new QLabel(title);
 			titleLabel->setWordWrap(true);
-			titleLabel->setStyleSheet("QLabel{font-size: 15px;font-family: Arial;}"); 
+			titleLabel->setStyleSheet("QLabel{font-size: 17px;font-family: Arial;}"); 
             titleScheduledLayout->addWidget(titleLabel);
 
 
@@ -797,8 +1163,8 @@ QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
 				timeLabel->setStyleSheet("QLabel{font-size: 12px;font-family: Arial;}");
 				titleScheduledLayout->addWidget(timeLabel);
 			QPushButton* SelectButton = new QPushButton("Select");
-			QObject::connect(SelectButton, &QPushButton::clicked, [this , jsonObject]() {
-	
+			QObject::connect(SelectButton, &QPushButton::clicked, [this , jsonObject , tabWidget]() {
+					currentBroadcast = jsonObject["id"].dump();
 				
 
                 	auto &global = GlobalMultiOutputConfig();
@@ -814,8 +1180,8 @@ QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
 			 	obs_service_t *service = obs_frontend_get_streaming_service();
     			obs_data_t *settings = obs_service_get_settings(service);
     			// cout << obs_data_get_json_pretty(settings) << endl;
-				 QString url = firstDestination["url"].get<std::string>().c_str();
-        QString key = firstDestination["key"].get<std::string>().c_str();
+				QString url = firstDestination["url"].get<std::string>().c_str();
+        		QString key = firstDestination["key"].get<std::string>().c_str();
 				obs_data_set_string(settings, "key", key.toStdString().c_str());
 				obs_data_set_string(settings, "server", url.toStdString().c_str());
     			obs_data_release(settings);
@@ -844,7 +1210,7 @@ QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
             SaveConfig();
         }
 				
-
+				tabWidget->setCurrentIndex(1);
     	});
 
 		
@@ -883,17 +1249,7 @@ QObject::connect(addButton, &QPushButton::clicked,
 QWidget* buttonContainer = new QWidget;
 buttonContainer->setLayout(buttonLayout);
 newUiLayout->addWidget(buttonContainer);
-// Connect signals and slots for Cancel and Add buttons
-// QObject::connect(cancelButton, &QPushButton::clicked, window, &QWidget::close);
 
-    // networkReply->deleteLater();
-
-    // newUiLayout->addWidget(successLabel);
-  
-	
-    // newUi->setCentralWidget(centralWidget);
-
-    // newUi->show();
 }
 
 
@@ -935,9 +1291,6 @@ newUiLayout->addWidget(buttonContainer);
 	}
 
 	void SaveConfig() { SaveMultiOutputConfig(); }
-
-
-
 
 void LoadConfig() {
 	 // Clear previous pushwidgets from itemLayout_

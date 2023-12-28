@@ -10,6 +10,8 @@
 #include "json-util.hpp"
 
 
+
+
 MultiOutputConfig& GlobalMultiOutputConfig()
 {
     static MultiOutputConfig instance;
@@ -52,6 +54,13 @@ static nlohmann::json SaveAudioConfig(AudioEncoderConfig& config) {
     return json;
 }
 
+static nlohmann::json SaveAuthConfig(AuthConfig& config) {
+    nlohmann::json json;
+    json["uid"] = config.uid;
+    json["key"] = config.key;
+    return json;
+}
+
 static std::string SaveMultiOutputConfig(MultiOutputConfig& config) {
     nlohmann::json json;
 
@@ -79,9 +88,20 @@ static std::string SaveMultiOutputConfig(MultiOutputConfig& config) {
             audio_configs.push_back(SaveAudioConfig(*audio_config));
     }
 
+   nlohmann::json auth_configs(nlohmann::json::value_t::object);
+
+    for (const auto& authConfig : config.authConfig) {
+    if (authConfig) {
+        nlohmann::json serializedAuth = SaveAuthConfig(*authConfig); // Assuming SaveAuthConfig serializes AuthConfig
+        // Assuming 'some_unique_identifier' represents a key for the AuthConfig in auth_configs
+        auth_configs["uid"] = serializedAuth;
+    }
+}
+
     json["targets"] = targets;
     json["video_configs"] = video_configs;
     json["audio_configs"] = audio_configs;
+    json["auth_configs"] = auth_configs;
 
     return json.dump();
 }
@@ -102,7 +122,8 @@ static OutputTargetConfigPtr LoadTargetConfig(nlohmann::json& json) {
     config->outputParam = GetJsonField<nlohmann::json>(json, "output-param").value_or(nlohmann::json{});
     config->videoConfig = GetJsonField<std::string>(json, "video-config");
     config->audioConfig = GetJsonField<std::string>(json, "audio-config");
-
+    
+   
     return config;
 }
 
@@ -131,6 +152,24 @@ static AudioEncoderConfigPtr LoadAudioConfig(nlohmann::json& json) {
     config->encoderId = GetJsonField<std::string>(json, "encoder").value_or("");
     config->mixerId = GetJsonField<int>(json, "mixerId").value_or(0);
     config->encoderParams = GetJsonField<nlohmann::json>(json, "param").value_or(nlohmann::json{});
+
+    return config;
+}
+
+
+static AuthConfigPtr LoadAuthConfig(nlohmann::json& json) {
+    auto uid = GetJsonField<std::string>(json, "uid");
+    if (!uid.has_value()) {
+        return nullptr; // Return nullptr or empty shared_ptr if uid is not found
+    }
+
+    auto config = std::make_shared<AuthConfig>();
+    config->uid = *uid;
+
+    auto key = GetJsonField<std::string>(json, "key");
+    if (key.has_value()) {
+        config->key = *key;
+    }
 
     return config;
 }
@@ -173,6 +212,19 @@ static MultiOutputConfig LoadMultiOutputConfig(const std::string& content) {
                 }
             }
         }
+
+        // it = json.find("auth_configs");
+        // if (it != json.end() && it->is_object()) {
+        //     // Assuming auth_configs contain keys representing AuthConfig objects
+        //     for (auto& auth : *it) {
+        //         if (auth.is_object()) {
+        //             auto loadedAuthConfig = LoadAuthConfig(auth);
+        //             if (loadedAuthConfig) {
+        //                 config.authConfig.emplace_back(loadedAuthConfig);
+        //             };
+        //         };
+        //     }
+        // }
         
         return config;
     }
