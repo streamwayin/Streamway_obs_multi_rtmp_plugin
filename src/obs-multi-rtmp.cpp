@@ -53,6 +53,7 @@ class MultiOutputWidget : public QDockWidget {
 	QJsonObject jsonObj;
 	CURL *curl;
   	CURLcode res;
+	QString uid , key;
 
 public:
 	MultiOutputWidget(QWidget *parent = 0)
@@ -71,13 +72,13 @@ public:
 
 		scroll_ = new QScrollArea(this);
 		scroll_->move(0, 22);
-
 		container_ = new QWidget(this);
+		container_->setMaximumWidth(270); 
 		layout_ = new QVBoxLayout(container_);
 		layout_->setAlignment(Qt::AlignmentFlag::AlignTop);
 
 
-		 QString uid, key;
+		//  QString uid, key;
 
     auto profiledir = obs_frontend_get_current_profile_path();
     if (profiledir) {
@@ -246,27 +247,26 @@ if (!uid.isEmpty() && !key.isEmpty()) {
 
 
 
-			auto horizontalLayout = new QHBoxLayout;
-			auto label = new QLabel(
-				u8"<p>Get Your <a href=\"https://app.streamway.in/setting\">Uid and Api Key</a></p>",
-				container_);
-			label->setTextFormat(Qt::RichText);
-			label->setTextInteractionFlags(
-				Qt::TextBrowserInteraction);
-			label->setOpenExternalLinks(true);
-			horizontalLayout->addWidget(label);
+			auto horizontalLayout = new QVBoxLayout;
+			// auto label = new QLabel(
+			// 	u8"<p>Get Your <a href=\"https://app.streamway.in/setting\">Uid and Api Key</a></p>",
+			// 	container_);
+			// label->setTextFormat(Qt::RichText);
+			// label->setTextInteractionFlags(
+			// 	Qt::TextBrowserInteraction);
+			// label->setOpenExternalLinks(true);
+			// horizontalLayout->addWidget(label);
 
-			auto watchLable = new QLabel(
-				u8"<p>How to Use <a href=\"https://app.streamway.in/setting\">Watch Our Video</a> </p>",
-				container_);
+			auto watchLable = new QLabel(u8"<p><a href=\"https://app.streamway.in/setting\">Watch how to use plugin</a> </p>", container_);
 			watchLable->setTextFormat(Qt::RichText);
+			watchLable->setWordWrap(true);
 			watchLable->setTextInteractionFlags(
 				Qt::TextBrowserInteraction);
 			watchLable->setOpenExternalLinks(true);
 			horizontalLayout->addWidget(watchLable);
 
 			auto supportLable = new QLabel(
-				u8"<p>Any Help <a href=\"https://streamway.in/contact\">Contact Us</a></p>",
+				u8"<p>Any Help <a href=\"https://support.streamway.in/contact/\">Contact Us</a></p>",
 				container_);
 			supportLable->setTextFormat(Qt::RichText);
 			supportLable->setTextInteractionFlags(
@@ -274,7 +274,7 @@ if (!uid.isEmpty() && !key.isEmpty()) {
 			supportLable->setOpenExternalLinks(true);
 			horizontalLayout->addWidget(supportLable);
 			layout_->addLayout(horizontalLayout);
-			label->setWordWrap(true);
+			// label->setWordWrap(true);
 			watchLable->setWordWrap(true);
 			supportLable->setWordWrap(true);
 		}
@@ -363,7 +363,7 @@ errorL->setVisible(false);
 			curl = curl_easy_init();
 
 			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
-			curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/otp/obs/phone/send");
+			curl_easy_setopt(curl, CURLOPT_URL, "https://testapi.streamway.in/v1/otp/obs/phone/send");
 			// curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 			// curl_easy_setopt(curl , CURLOPT_WRITEFUNCTION , writeCallback);
 
@@ -418,7 +418,7 @@ errorL->setVisible(false);
 			curl = curl_easy_init();
 
 			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
-			curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/v1/otp/obs/verify");
+			curl_easy_setopt(curl, CURLOPT_URL, "https://testapi.streamway.in/v1/otp/obs/verify");
 			// curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 			// curl_easy_setopt(curl , CURLOPT_WRITEFUNCTION , writeCallback);
 
@@ -674,12 +674,12 @@ QWidget* LoginWithAPIKeyWidget(QTabWidget *tabWidget) {
 
 
 							
-					handleTab( layout_ , scrollLayout, uid , key);
-						// while (tabWidget->count() > 0) {
-            			// 	QWidget* tabToRemove = tabWidget->widget(0); // Get the first 		tab
-            			// 	tabWidget->removeTab(0); // Remove the first tab
-            			// 	delete tabToRemove; // Optionally delete the removed tab widget
-       					//  }
+					handleTab( layout_ , layout_, uid , key);
+						while (tabWidget->count() > 0) {
+            				QWidget* tabToRemove = tabWidget->widget(0); // Get the first 		tab
+            				tabWidget->removeTab(0); // Remove the first tab
+            				delete tabToRemove; // Optionally delete the removed tab widget
+       					 }
 	}catch (const std::exception& e) {
 		scrollWidget->setVisible(true);
        	errorL->setVisible(true);
@@ -695,6 +695,17 @@ QWidget* LoginWithAPIKeyWidget(QTabWidget *tabWidget) {
         errorL->setVisible(true);
     }			
 		});
+
+
+
+	auto label = new QLabel(
+				u8"<p>Get Your <a href=\"https://app.streamway.in/setting\">Uid and Api Key</a></p>",
+				container_);
+			label->setTextFormat(Qt::RichText);
+			label->setTextInteractionFlags(
+				Qt::TextBrowserInteraction);
+			label->setOpenExternalLinks(true);
+			LoginLayout->addWidget(label);
 
     return loginWithAPIKeyWidget;
 }
@@ -802,7 +813,7 @@ QWidget* createTab1(const QString& uid, const QString& key , QTabWidget *tabWidg
 };
 
 // Function to create Tab 2 and its content
-QWidget* createTab2() {
+QWidget* createTab2(QVBoxLayout* newUiLayout, const QString& uid, const QString& key , QTabWidget *tabWidget) {
 	// QScrollArea* scrollArea = new QScrollArea;
     QWidget* tab2 = new QWidget;
     tab2Layout = new QVBoxLayout(tab2);
@@ -810,8 +821,8 @@ QWidget* createTab2() {
 	// scrollArea->resize(300,300);
 	// scrollArea->setWidgetResizable(true);
 	// scrollArea->setWidget(tab2);
-
-    // tab2->setFixedSize(320, 600);
+	tab2->setMinimumWidth(150);
+    tab2->setMaximumWidth(250);
 	// tab2Layout->addWidget(scrollArea);
 	// init widget
 		auto addButton = new QPushButton(
@@ -845,6 +856,8 @@ QWidget* createTab2() {
 
 		// start all, stop all
 		auto allBtnContainer = new QWidget(this);
+		allBtnContainer->setMaximumHeight(70);
+		// allBtnContainer->setStyleSheet("background-color: lightblue;"); // Change color as needed
 		auto allBtnLayout = new QHBoxLayout(allBtnContainer);
 		auto startAllButton = new QPushButton(
 			obs_module_text("Btn.StartAll"), allBtnContainer);
@@ -854,24 +867,29 @@ QWidget* createTab2() {
 		allBtnLayout->addWidget(stopAllButton);
 		allBtnContainer->setLayout(allBtnLayout);
 		tab2Layout->addWidget(allBtnContainer);
-		auto endAllBroadcastButton = new QPushButton("End Broadcast");
+		auto endAllBroadcastButton = new QPushButton("End Broadcast & Stop All");
 		tab2Layout->addWidget(endAllBroadcastButton);
+		endAllBroadcastButton->setEnabled(false);
+		tab2Layout->setContentsMargins(0, 0, 0, 0);
 
-		QObject::connect(endAllBroadcastButton, &QPushButton::clicked, [this]() {
-			
+		QObject::connect(endAllBroadcastButton, &QPushButton::clicked, [this , newUiLayout , uid , key , tabWidget]() {
+			obs_frontend_streaming_stop();
 			CURL *curl;
     		CURLcode res;
 			curl = curl_easy_init();
 
 			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
-			std::string url = "http://localhost:8000/v1/broadcasts/" + currentBroadcast;
+			std::string url = "https://testapi.streamway.in/v1/broadcasts/" + currentBroadcast;
 			curl_easy_setopt(curl, CURLOPT_URL,url.c_str());
-			// curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
-			// curl_easy_setopt(curl , CURLOPT_WRITEFUNCTION , writeCallback);
+			   // Set authentication
+    		curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    		curl_easy_setopt(curl, CURLOPT_USERNAME, uid.toStdString().c_str());
+    		curl_easy_setopt(curl, CURLOPT_PASSWORD, key.toStdString().c_str());
 
 			struct curl_slist *headers = NULL;
 			headers = curl_slist_append(headers, "Accept: */*");
 			headers = curl_slist_append(headers, "Content-Type: application/json");
+			
 			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 			
 
@@ -884,23 +902,51 @@ QWidget* createTab2() {
     		    return false;
     		}
 
-			// if (res != CURLE_OK) {
-    		//     curl_easy_cleanup(curl);
-    		//     return false;
-    		// }
-
     		// Cleanup
     		curl_easy_cleanup(curl);
 			curl = NULL;
-
-		})
+			tabWidget->setCurrentIndex(0);
+			tabWidget->update();
+		});
 
 
 		QObject::connect(startAllButton, &QPushButton::clicked,
-				 [this]() {
+				 [this , uid , key , endAllBroadcastButton]() {
 					 obs_frontend_streaming_start();
+					 endAllBroadcastButton->setEnabled(true);
 					 for (auto x : GetAllPushWidgets())
 						 x->StartStreaming();
+
+
+						CURL *curl;
+    		CURLcode res;
+			curl = curl_easy_init();
+			std::string url = "https://testapi.streamway.in/v1/webhook/obs/" + currentBroadcast;
+			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+			   // Set authentication
+    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    curl_easy_setopt(curl, CURLOPT_USERNAME, uid.toStdString().c_str());
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, key.toStdString().c_str());
+
+			struct curl_slist *headers = NULL;
+			headers = curl_slist_append(headers, "Accept: */*");
+			headers = curl_slist_append(headers, "Content-Type: application/json");
+			headers = curl_slist_append(headers, "obs-webhook-auth: b1d66555d2a1cfe4e773457dd44dc664");
+			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+			
+
+			CURLcode ret = curl_easy_perform(curl);
+
+			long response_code;
+				curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+
+	    		if (response_code != 200) {
+        			curl_easy_cleanup(curl);
+    			}
+
+	  curl_easy_cleanup(curl);
+		curl = NULL;
 				 });
 		QObject::connect(stopAllButton, &QPushButton::clicked,
 				 [this]() {
@@ -978,19 +1024,12 @@ QString quote = "Credit -> obs-multi-rtmp plugin by sorayuki\n"
 				"This plugin is an extention of obs-multi-rtmp and it intents to empower users to multistream from within OBS itself. "
 				"Purpose of plugin is to let user schedule event from within the OBS studio itself rathar than opening multiple tabs of diffrent social platforms like youtube and facebook and manually copy pasting the keys etc. "
 				"https://github.com/sorayuki/obs-multi-rtmp";
-
-auto linkLable = new QLabel(
-				u8"<p> <a href=\"https://github.com/sorayuki/obs-multi-rtmp\"></a> </p>",
-				tab3);
-			linkLable->setTextFormat(Qt::RichText);
-			linkLable->setTextInteractionFlags(
-				Qt::TextBrowserInteraction);
-			linkLable->setOpenExternalLinks(true);				
+			
 
 QLabel* quoteLabel = new QLabel(quote);
 tab3Layout->addWidget(quoteLabel);
 quoteLabel->setWordWrap(true);
-tab3Layout->addWidget(linkLable);
+
 // Add the quote label to the layout or widget where you want to display it
 tab3Layout->addWidget(quoteLabel);
     return tab3;
@@ -1000,7 +1039,7 @@ void handleTab( QVBoxLayout *layout , QVBoxLayout *newUiLayout ,const QString& u
 	// Create a QTabWidget to hold the tabs
 	QTabWidget* tabWidget = new QTabWidget;
 	QWidget* tab1 = createTab1(uid, key , tabWidget);
-    QWidget* tab2 = createTab2();
+    QWidget* tab2 = createTab2(newUiLayout ,  uid,  key , tabWidget);
     QWidget* tab3 = createTab3(newUiLayout);
 
     // Set size policies to prevent unnecessary space
@@ -1010,8 +1049,8 @@ void handleTab( QVBoxLayout *layout , QVBoxLayout *newUiLayout ,const QString& u
 
 	 // Set fixed sizes for tabs
     // tab1->setFixedSize(200, 50); // Set width and height for tab1
-    tab2->setMinimumSize(300, 200); // Set minimum width and height for tab2
-    tab3->setMaximumSize(240, 230); // Set maximum width and height for tab3
+    tab2->setMinimumSize(100, 200); // Set minimum width and height for tab2
+    tab3->setMaximumSize(250, 270); // Set maximum width and height for tab3
 
 	 // Set background color for each tab
     // tab1->setStyleSheet("background-color: lightblue;"); // Change color as needed
@@ -1079,14 +1118,10 @@ void handleSuccessfulLogin(const QString& uid, const QString& key, QVBoxLayout *
 	curl = NULL;
 
 	auto j3 = Json::parse(readBuffer);
-	Json object = j3;
-	std::string title =j3[0]["title"];
-	// QString qTitle = QString::fromStdString(title);
-	// QLabel* tokenLabelSizep = new QLabel(qTitle);
-    //     newUiLayout->addWidget(tokenLabelSizep);
+	
 
-
- QJsonArray qArray;
+	if(j3.is_array() && !j3.empty()){
+		QJsonArray qArray;
 
         // Iterate through the nlohmann::json array and build the QJsonArray
         for (const auto& obj : j3) {
@@ -1111,20 +1146,21 @@ void handleSuccessfulLogin(const QString& uid, const QString& key, QVBoxLayout *
 
 
 		// Create a scroll area and set up a widget to contain the items
-QScrollArea* scrollArea = new QScrollArea;
-QWidget* scrollWidget = new QWidget;
+		QScrollArea* scrollArea = new QScrollArea;
+		QWidget* scrollWidget = new QWidget;
 
-// scrollWidget->resize(300,300);
-scrollArea->setWidgetResizable(true);
-scrollArea->setWidget(scrollWidget);
+		// scrollWidget->resize(300,300);
+		scrollArea->setWidgetResizable(true);
+		scrollArea->setWidget(scrollWidget);
 
-// Create a layout for the widget inside the scroll area
-QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
-
-for (const auto& jsonObject : j3) {
+		// Create a layout for the widget inside the scroll area
+		QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
+		// Set the margins of the layout to zero (removing spacing)
+		// scrollLayout->setContentsMargins(0, 0, 0, 0);
+		for (const auto& jsonObject : j3) {
     
-        // QJsonObject jsonObject = jsonValue.toObject();
-        if (jsonObject.contains("title")) {
+        	// QJsonObject jsonObject = jsonValue.toObject();
+        	if (jsonObject.contains("title")) {
             // Create a custom widget to represent each item
             QWidget* itemWidget = new QWidget;
             QVBoxLayout* itemLayout = new QVBoxLayout(itemWidget);
@@ -1138,7 +1174,9 @@ for (const auto& jsonObject : j3) {
 
             // Show title from jsonObject
              QString title = QString::fromStdString(jsonObject["title"].get<std::string>());
+			 
             QLabel* titleLabel = new QLabel(title);
+			// titleLabel->setMaximumHeight(20);
 			titleLabel->setWordWrap(true);
 			titleLabel->setStyleSheet("QLabel{font-size: 17px;font-family: Arial;}"); 
             titleScheduledLayout->addWidget(titleLabel);
@@ -1150,15 +1188,16 @@ for (const auto& jsonObject : j3) {
 
 			// QString scheduledTimeStr = "2023-11-06T16:24";
 
-// Parse the input string
-QDateTime scheduledTime = QDateTime::fromString(scheduledTimeStr, "yyyy-MM-ddTHH:mm");
+			// Parse the input string
+			QDateTime scheduledTime = QDateTime::fromString(scheduledTimeStr, "yyyy-MM-ddTHH:mm");
 
-// Format the datetime as per your requirement
-QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
+			// Format the datetime as per your requirement
+			QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
 			// QLabel* gfgf = new QLabel("scheduledTime");
             // titleScheduledLayout->addWidget(gfgf);
 
             QLabel* timeLabel = new QLabel(formattedTime);
+			// timeLabel->setMaximumHeight(20);
             // titleScheduledLayout->addWidget(timeLabel);
 				timeLabel->setStyleSheet("QLabel{font-size: 12px;font-family: Arial;}");
 				titleScheduledLayout->addWidget(timeLabel);
@@ -1211,7 +1250,7 @@ QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
         }
 				
 				tabWidget->setCurrentIndex(1);
-    	});
+    		});
 
 		
 			titleScheduledLayout->addWidget(SelectButton);
@@ -1224,19 +1263,30 @@ QString formattedTime = scheduledTime.toString("dddd, MMMM d 'at' h:mm AP");
             // Add the custom widget to the scroll layout
             scrollLayout->addWidget(itemWidget);
         }
+
+
    
 }
 
+// Add the scroll area to your main layout or window
+newUiLayout->addWidget(scrollArea);
+
+	}else{
+			auto label = new QLabel(
+				u8"No Broadcast Scheduled");
+				label->setMaximumHeight(20);
+			newUiLayout->addWidget(label);
+	}
+ 		
 
 // Create a horizontal layout for Add and Cancel buttons
 QHBoxLayout* buttonLayout = new QHBoxLayout;
-
 // Create Cancel and Add buttons outside of the loop
 // QPushButton* cancelButton = new QPushButton("Cancel");
 QPushButton* addButton = new QPushButton("Schedule New Broadcast");
+addButton->setMaximumHeight(20);
 
-// Add the scroll area to your main layout or window
-newUiLayout->addWidget(scrollArea);
+
 // Add Cancel and Add buttons to the layout or wherever appropriate
 // buttonLayout->addWidget(cancelButton);
 buttonLayout->addWidget(addButton);
@@ -1252,7 +1302,41 @@ newUiLayout->addWidget(buttonContainer);
 
 }
 
+void startStreamingListner(){
+			
+				CURL *curl;
+    			CURLcode res;
+				curl = curl_easy_init();
+				std::string url = "https://testapi.streamway.in/v1/webhook/obs/" + currentBroadcast;
+				curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+				curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+			   	// Set authentication
+    			curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    			curl_easy_setopt(curl, CURLOPT_USERNAME, uid.toStdString().c_str());
+    			curl_easy_setopt(curl, CURLOPT_PASSWORD, key.toStdString().c_str());
 
+				struct curl_slist *headers = NULL;
+				headers = curl_slist_append(headers, "Accept: */*");
+				headers = curl_slist_append(headers, "Content-Type: application/json");
+				headers = curl_slist_append(headers, "obs-webhook-auth: b1d66555d2a1cfe4e773457dd44dc664");
+				curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+			
+
+				CURLcode ret = curl_easy_perform(curl);
+
+				long response_code;
+					curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+
+	    			if (response_code != 200) {
+        				curl_easy_cleanup(curl);
+    				}
+
+	  			curl_easy_cleanup(curl);
+				curl = NULL;
+			
+
+			
+}
 
 	void visibleToggled(bool visible)
 	{
@@ -1351,24 +1435,23 @@ bool obs_module_load()
 	QObject::connect(action, &QAction::toggled, dock,
 			 &MultiOutputWidget::visibleToggled);
 
-	obs_frontend_add_event_callback(
-		[](enum obs_frontend_event event, void *private_data) {
-			auto mainwin =
-				static_cast<MultiOutputWidget *>(private_data);
+	   obs_frontend_add_event_callback(
+        [](enum obs_frontend_event event, void *private_data) {
+            auto dock = static_cast<MultiOutputWidget*>(private_data);
 
-			for (auto x : mainwin->GetAllPushWidgets())
-				x->OnOBSEvent(event);
+            for(auto x: dock->GetAllPushWidgets())
+                x->OnOBSEvent(event);
 
-			if (event ==
-			    obs_frontend_event::OBS_FRONTEND_EVENT_EXIT) {
-				mainwin->SaveConfig();
-			} else if (event ==
-				   obs_frontend_event::
-					   OBS_FRONTEND_EVENT_PROFILE_CHANGED) {
-				mainwin->LoadConfig();
-			}
-		},
-		dock);
+            if (event == obs_frontend_event::OBS_FRONTEND_EVENT_EXIT)
+            {   
+                dock->SaveConfig();
+            }
+            else if (event == obs_frontend_event::OBS_FRONTEND_EVENT_PROFILE_CHANGED)
+            {
+                dock->LoadConfig();
+            }
+        }, dock
+    );
 
 	return true;
 }
@@ -1401,3 +1484,11 @@ const char *obs_module_description(void)
 //     obs.obs_data_set_string(settings, 'key', key)
 //     obs.obs_data_release(settings)
 //     return False # Can also be true, doesn't matter
+
+// 	else if (event ==
+		// 			obs_frontend_event::
+		// 			OBS_FRONTEND_EVENT_STREAMING_STARTING){
+		// 				MultiOutputWidget myWidget;
+		// 				myWidget.startStreamingListner(); // Call the member function using the object
+		// 			}
+		// }
